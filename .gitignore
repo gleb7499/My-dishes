@@ -1,1 +1,32 @@
-/build
+# Java/Android Studio
+*.iml
+.gradle/
+local.properties
+
+.idea/*
+!.idea/.gitignore
+!.idea/.name
+
+# MacOS
+.DS_Store
+
+# Build directories
+/build/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Log files
+*.log
+
+# Gradle
+.gradle/
+build/
+
+# Signing files
+*.jks
+*.keystore
+key.properties
+
+# Kotlin specific
+*.kotlin_module

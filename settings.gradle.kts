@@ -20,5 +20,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "My dishes"
-include(":app")
  
