@@ -1,5 +1,14 @@
 plugins {
     alias(libs.plugins.android.application)
+    id("org.sonarqube") version "6.2.0.5505"
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "gleb7499_My-dishes")
+        property("sonar.organization", "gleb7499-1")
+        property("sonar.host.url", "https://sonarcloud.io")
+    }
 }
 
 android {
