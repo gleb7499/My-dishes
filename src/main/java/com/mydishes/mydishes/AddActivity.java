@@ -12,16 +12,33 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.search.SearchBar;
 import com.google.android.material.search.SearchView;
 import com.google.android.material.snackbar.Snackbar;
+import com.mydishes.mydishes.Adapters.RecyclerViewDishesAdapter;
+import com.mydishes.mydishes.Models.DishesManager;
 import com.mydishes.mydishes.Parser.EdostavkaParser;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class AddActivity extends AppCompatActivity {
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (searchRunnable != null) {
+            handler.removeCallbacks(searchRunnable);
+        }
+    }
+
     private final Handler handler = new Handler();
     private Runnable searchRunnable;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private RecyclerView recyclerView;
 
     private void setMargins(View view) {
         ViewCompat.setOnApplyWindowInsetsListener(view, (v, windowInsets) -> {
@@ -63,7 +80,7 @@ public class AddActivity extends AppCompatActivity {
                     }
                 };
 
-                handler.postDelayed(searchRunnable, 700); // задержка после последнего ввода
+                handler.postDelayed(searchRunnable, 500); // задержка после последнего ввода
             }
 
             @Override
@@ -74,16 +91,28 @@ public class AddActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
             }
         });
+
+        recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
     }
 
-    private void runSearch(String query) {
-        new Thread(() -> {
-            EdostavkaParser.find(query); // твой парсинг
-            runOnUiThread(() -> {
-                Snackbar.make(findViewById(android.R.id.content), "Найдено: " + EdostavkaParser.getDishesList().size(), Snackbar.LENGTH_SHORT).show();
+    public void runSearch(String query) {
+        executor.submit(() -> {
+            try {
+                EdostavkaParser.find(query); // фоновый парсинг
+            } catch (Exception e) {
+                runOnUiThread(() ->
+                        Snackbar.make(findViewById(android.R.id.content), "Ошибка! " + e, Snackbar.LENGTH_LONG).show()
+                );
+                return; // выходим, чтобы не показывать "Найдено: ..."
+            }
 
-                // Здесь можно сразу обновлять адаптер списка, если есть
+            runOnUiThread(() -> {
+                Snackbar.make(findViewById(android.R.id.content), "Найдено: " + DishesManager.size(), Snackbar.LENGTH_SHORT).show();
+
+                // Обновляем адаптер списка
+                recyclerView.setAdapter(new RecyclerViewDishesAdapter(this));
             });
-        }).start();
+        });
     }
 }

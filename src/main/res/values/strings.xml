@@ -46,4 +46,5 @@
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
     <string name="searchbar_hint">Название товара</string>
+    <string name="productsPhoto">Фото продукта</string>
 </resources>
