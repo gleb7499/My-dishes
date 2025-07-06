@@ -6,6 +6,8 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -39,6 +41,9 @@ public class AddActivity extends AppCompatActivity {
     private Runnable searchRunnable;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private RecyclerView recyclerView;
+    private ProgressBar progressBar;
+
+    private TextView textViewNothing;
 
     private void setMargins(View view) {
         ViewCompat.setOnApplyWindowInsetsListener(view, (v, windowInsets) -> {
@@ -61,6 +66,11 @@ public class AddActivity extends AppCompatActivity {
 
         SearchBar searchBar = findViewById(R.id.searchBar);
         SearchView searchView = findViewById(R.id.searchView);
+
+        progressBar = findViewById(R.id.progressBar);
+
+        textViewNothing = findViewById(R.id.textViewNothing);
+
         setMargins(findViewById(R.id.main));
 
         searchView.setupWithSearchBar(searchBar);
@@ -76,6 +86,9 @@ public class AddActivity extends AppCompatActivity {
                 searchRunnable = () -> {
                     String query = s.toString().trim();
                     if (query.length() > 1) { // Не парсим по 1 букве
+                        progressBar.setVisibility(View.VISIBLE);
+                        textViewNothing.setVisibility(View.INVISIBLE);
+                        recyclerView.setVisibility(View.INVISIBLE);
                         runSearch(query);
                     }
                 };
@@ -101,17 +114,23 @@ public class AddActivity extends AppCompatActivity {
             try {
                 EdostavkaParser.find(query); // фоновый парсинг
             } catch (Exception e) {
-                runOnUiThread(() ->
-                        Snackbar.make(findViewById(android.R.id.content), "Ошибка! " + e, Snackbar.LENGTH_LONG).show()
-                );
+                runOnUiThread(() -> {
+                    progressBar.setVisibility(View.INVISIBLE);
+                    Snackbar.make(findViewById(android.R.id.content), "Ошибка! " + e, Snackbar.LENGTH_LONG).show();
+                });
                 return; // выходим, чтобы не показывать "Найдено: ..."
             }
 
             runOnUiThread(() -> {
                 Snackbar.make(findViewById(android.R.id.content), "Найдено: " + DishesManager.size(), Snackbar.LENGTH_SHORT).show();
-
                 // Обновляем адаптер списка
                 recyclerView.setAdapter(new RecyclerViewDishesAdapter(this));
+                progressBar.setVisibility(View.INVISIBLE);
+                if (DishesManager.isEmpty()) {
+                    textViewNothing.setVisibility(View.VISIBLE);
+                } else {
+                    recyclerView.setVisibility(View.VISIBLE);
+                }
             });
         });
     }

@@ -22,6 +22,10 @@ public class DishesManager {
         return DISH_LIST.size();
     }
 
+    public static boolean isEmpty() {
+        return DISH_LIST.isEmpty();
+    }
+
     public static final class Dish {
         private String url;
         private String image;
