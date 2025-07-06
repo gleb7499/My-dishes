@@ -5,15 +5,11 @@ import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -23,6 +19,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.mydishes.mydishes.Adapters.RecyclerViewDishesAdapter;
 import com.mydishes.mydishes.Models.DishesManager;
 import com.mydishes.mydishes.Parser.EdostavkaParser;
+import com.mydishes.mydishes.utils.ViewUtils;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -45,50 +42,42 @@ public class AddActivity extends AppCompatActivity {
 
     private TextView textViewNothing;
 
-    private void setMargins(View view) {
-        ViewCompat.setOnApplyWindowInsetsListener(view, (v, windowInsets) -> {
-            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-            ViewGroup.MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
-            mlp.leftMargin = insets.left;
-            mlp.bottomMargin = insets.bottom;
-            mlp.rightMargin = insets.right;
-            mlp.topMargin = insets.top;
-            v.setLayoutParams(mlp);
-            return WindowInsetsCompat.CONSUMED;
-        });
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+        getWindow().setNavigationBarColor(android.graphics.Color.TRANSPARENT);
+        getWindow().setStatusBarColor(android.graphics.Color.TRANSPARENT);
+
         setContentView(R.layout.activity_add);
 
         SearchBar searchBar = findViewById(R.id.searchBar);
         SearchView searchView = findViewById(R.id.searchView);
-
         progressBar = findViewById(R.id.progressBar);
-
         textViewNothing = findViewById(R.id.textViewNothing);
-
-        setMargins(findViewById(R.id.main));
+        recyclerView = findViewById(R.id.recyclerView);
 
         searchView.setupWithSearchBar(searchBar);
+
+        ViewUtils.applyInsets(findViewById(R.id.searchLayout), true, false, false, false);
 
         searchView.getEditText().addTextChangedListener(new TextWatcher() {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String query = s.toString().trim();
+
+                if (query.length() > 1) {
+                    progressBar.setVisibility(View.VISIBLE);
+                    textViewNothing.setVisibility(View.INVISIBLE);
+                    recyclerView.setVisibility(View.INVISIBLE);
+                }
 
                 if (searchRunnable != null) {
                     handler.removeCallbacks(searchRunnable); // Отменяем прошлую попытку
                 }
 
                 searchRunnable = () -> {
-                    String query = s.toString().trim();
                     if (query.length() > 1) { // Не парсим по 1 букве
-                        progressBar.setVisibility(View.VISIBLE);
-                        textViewNothing.setVisibility(View.INVISIBLE);
-                        recyclerView.setVisibility(View.INVISIBLE);
                         runSearch(query);
                     }
                 };
@@ -105,7 +94,6 @@ public class AddActivity extends AppCompatActivity {
             }
         });
 
-        recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
     }
 
@@ -122,7 +110,6 @@ public class AddActivity extends AppCompatActivity {
             }
 
             runOnUiThread(() -> {
-                Snackbar.make(findViewById(android.R.id.content), "Найдено: " + DishesManager.size(), Snackbar.LENGTH_SHORT).show();
                 // Обновляем адаптер списка
                 recyclerView.setAdapter(new RecyclerViewDishesAdapter(this));
                 progressBar.setVisibility(View.INVISIBLE);

@@ -1,14 +1,17 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. -->
     <style name="Base.Theme.MyDishes" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
     </style>
 
     <style name="Theme.MyDishes" parent="Base.Theme.MyDishes" />
 
     <style name="CustomProgressBar" parent="Widget.AppCompat.ProgressBar">
-        <item name="android:indeterminateTint">?attr/colorPrimary</item>
+        <item name="android:indeterminateTint">?attr/colorOnBackground</item>
     </style>
 
 </resources>
