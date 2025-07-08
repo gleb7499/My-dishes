@@ -1,6 +1,6 @@
 package com.mydishes.mydishes.Parser;
 
-import com.mydishes.mydishes.Models.DishesManager;
+import com.mydishes.mydishes.Models.ProductsManager;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -23,7 +23,7 @@ public class EdostavkaParser {
      */
     public static void find(String query) throws IOException {
 
-        DishesManager.clear();
+        ProductsManager.clear();
 
 
         String url = SEARCH_URL + URLEncoder.encode(query, "UTF-8");
@@ -58,12 +58,12 @@ public class EdostavkaParser {
                 productName = Jsoup.parse(imageContainer.attr("alt")).text().replaceAll("\\u00AD", "").trim();
             }
 
-            DishesManager.Dish dish = new DishesManager.Dish();
-            dish.setUrl(productUrl);
-            dish.setImage(imageUrl);
-            dish.setName(productName);
+            ProductsManager.Product product = new ProductsManager.Product();
+            product.setProductURL(productUrl);
+            product.setImageURL(imageUrl);
+            product.setName(productName);
 
-            DishesManager.add(dish);
+            ProductsManager.add(product);
 
             count++;
         }

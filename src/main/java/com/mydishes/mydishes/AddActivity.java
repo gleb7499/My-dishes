@@ -17,7 +17,7 @@ import com.google.android.material.search.SearchBar;
 import com.google.android.material.search.SearchView;
 import com.google.android.material.snackbar.Snackbar;
 import com.mydishes.mydishes.Adapters.RecyclerViewDishesAdapter;
-import com.mydishes.mydishes.Models.DishesManager;
+import com.mydishes.mydishes.Models.ProductsManager;
 import com.mydishes.mydishes.Parser.EdostavkaParser;
 import com.mydishes.mydishes.utils.ViewUtils;
 
@@ -113,7 +113,7 @@ public class AddActivity extends AppCompatActivity {
                 // Обновляем адаптер списка
                 recyclerView.setAdapter(new RecyclerViewDishesAdapter(this));
                 progressBar.setVisibility(View.INVISIBLE);
-                if (DishesManager.isEmpty()) {
+                if (ProductsManager.isEmpty()) {
                     textViewNothing.setVisibility(View.VISIBLE);
                 } else {
                     recyclerView.setVisibility(View.VISIBLE);

@@ -3,7 +3,7 @@ package com.mydishes.mydishes.Adapters;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
-import com.mydishes.mydishes.Models.DishesManager;
+import com.mydishes.mydishes.Models.ProductsManager;
 import com.mydishes.mydishes.Parser.EdostavkaParser;
 
 import org.junit.Before;
@@ -15,7 +15,7 @@ public class EdostavkaParserTest {
 
     @Before
     public void setUp() {
-        DishesManager.clear(); // Чистим список перед каждым тестом
+        ProductsManager.clear(); // Чистим список перед каждым тестом
     }
 
     @Test
@@ -29,7 +29,7 @@ public class EdostavkaParserTest {
         double seconds = (end - start) / 1_000_000_000.0;
         System.out.printf("Время запроса -> %.3f секунд%n", seconds);
 
-        int size = DishesManager.size();
+        int size = ProductsManager.size();
 
         // Проверяем, что список не пустой
         assertNotNull(size);
@@ -39,10 +39,10 @@ public class EdostavkaParserTest {
 
         // Выводим примеры для визуальной проверки
         for (int i = 0; i < Math.min(5, size); i++) {
-            DishesManager.Dish dish = DishesManager.get(i);
-            System.out.println("Название: " + dish.getName());
-            System.out.println("Ссылка: " + dish.getUrl());
-            System.out.println("Изображение: " + dish.getImage());
+            ProductsManager.Product product = ProductsManager.get(i);
+            System.out.println("Название: " + product.getName());
+            System.out.println("Ссылка: " + product.getProductURL());
+            System.out.println("Изображение: " + product.getImageURL());
         }
     }
 }

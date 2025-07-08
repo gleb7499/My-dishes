@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.mydishes.mydishes.Models.DishesManager;
+import com.mydishes.mydishes.Models.ProductsManager;
 import com.mydishes.mydishes.R;
 
 public class RecyclerViewDishesAdapter extends RecyclerView.Adapter<RecyclerViewDishesAdapter.DishesViewHolder> {
@@ -31,20 +31,22 @@ public class RecyclerViewDishesAdapter extends RecyclerView.Adapter<RecyclerView
 
     @Override
     public void onBindViewHolder(@NonNull DishesViewHolder holder, int position) {
-        DishesManager.Dish dish = DishesManager.get(position);
+        ProductsManager.Product product = ProductsManager.get(position);
 
         Glide.with(context)
-                .load(dish.getImage())
+                .load(product.getImageURL())
                 .placeholder(R.drawable.placeholder)
                 .error(R.drawable.error_image)
                 .into(holder.imageView);
 
-        holder.textView.setText(dish.getName());
+        holder.textView.setText(product.getName());
+
+        holder.itemView.setTag(R.id.tag_product_url, product.getProductURL());
     }
 
     @Override
     public int getItemCount() {
-        return DishesManager.size();
+        return ProductsManager.size();
     }
 
     public static final class DishesViewHolder extends RecyclerView.ViewHolder {

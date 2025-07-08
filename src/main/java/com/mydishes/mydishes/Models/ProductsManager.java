@@ -3,52 +3,52 @@ package com.mydishes.mydishes.Models;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DishesManager {
-    private static final List<Dish> DISH_LIST = new ArrayList<>();
+public class ProductsManager {
+    private static final List<Product> PRODUCT_LIST = new ArrayList<>();
 
-    public static void add(Dish dish) {
-        DISH_LIST.add(dish);
+    public static void add(Product product) {
+        PRODUCT_LIST.add(product);
     }
 
-    public static Dish get(int i) {
-        return DISH_LIST.get(i);
+    public static Product get(int i) {
+        return PRODUCT_LIST.get(i);
     }
 
     public static void clear() {
-        DISH_LIST.clear();
+        PRODUCT_LIST.clear();
     }
 
     public static int size() {
-        return DISH_LIST.size();
+        return PRODUCT_LIST.size();
     }
 
     public static boolean isEmpty() {
-        return DISH_LIST.isEmpty();
+        return PRODUCT_LIST.isEmpty();
     }
 
-    public static final class Dish {
-        private String url;
-        private String image;
+    public static final class Product {
+        private String productURL;
+        private String imageURL;
         private String name;
         private short calories;
         private short protein;
         private short fat;
         private short carb;
 
-        public String getUrl() {
-            return url;
+        public String getProductURL() {
+            return productURL;
         }
 
-        public void setUrl(String url) {
-            this.url = url;
+        public void setProductURL(String productURL) {
+            this.productURL = productURL;
         }
 
-        public String getImage() {
-            return image;
+        public String getImageURL() {
+            return imageURL;
         }
 
-        public void setImage(String image) {
-            this.image = image;
+        public void setImageURL(String imageURL) {
+            this.imageURL = imageURL;
         }
 
         public String getName() {
