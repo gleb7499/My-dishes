@@ -5,6 +5,4 @@
     <item name="tag_margin_bottom" type="id" />
     <item name="tag_margin_left" type="id" />
     <item name="tag_margin_right" type="id" />
-    <!--  Продукт  -->
-    <item name="tag_product_url" type="id" />
 </resources>

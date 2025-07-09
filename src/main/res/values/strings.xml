@@ -48,4 +48,10 @@
     <string name="searchbar_hint">Название товара</string>
     <string name="productsPhoto">Фото продукта</string>
     <string name="NothingFind">Ничего не найдено :(</string>
+    <string name="mass">Масса</string>
+    <string name="gram">грамм</string>
+    <string name="enter_products_mass">Введите массу продукта</string>
+    <string name="ok">Oк</string>
+    <string name="error_value">Неверное значение</string>
+    <string name="cancel">Назад</string>
 </resources>
