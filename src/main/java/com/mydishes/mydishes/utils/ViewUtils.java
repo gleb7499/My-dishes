@@ -29,12 +29,25 @@ public class ViewUtils {
 
             // Теперь применяем Insets, если нужно
             if (left) params.leftMargin = systemInsets.left + (int) v.getTag(R.id.tag_margin_left);
-            if (right) params.rightMargin = systemInsets.right + (int) v.getTag(R.id.tag_margin_right);
+            if (right)
+                params.rightMargin = systemInsets.right + (int) v.getTag(R.id.tag_margin_right);
             if (top) params.topMargin = systemInsets.top + (int) v.getTag(R.id.tag_margin_top);
-            if (bottom) params.bottomMargin = systemInsets.bottom + (int) v.getTag(R.id.tag_margin_bottom);
+            if (bottom)
+                params.bottomMargin = systemInsets.bottom + (int) v.getTag(R.id.tag_margin_bottom);
 
             v.setLayoutParams(params);
             return insets;
         });
+    }
+
+    /**
+     * Преобразует строку в float, безопасно.
+     */
+    public static float parseFloatSafe(String text) {
+        try {
+            return (float) Double.parseDouble(text.replace(",", ".").replaceAll("[^\\d.]", ""));
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 }

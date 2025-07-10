@@ -25,6 +25,15 @@
             android:backgroundTint="@android:color/transparent"
             android:visibility="invisible" />
 
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/productListButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            android:contentDescription="@string/fab_content_desc"
+            app:srcCompat="@drawable/baseline_add_task_24"/>
+
         <ProgressBar
             android:id="@+id/progressBar"
             style="@style/CustomProgressBar"

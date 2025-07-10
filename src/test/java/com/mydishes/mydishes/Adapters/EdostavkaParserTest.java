@@ -1,48 +1,62 @@
 package com.mydishes.mydishes.Adapters;
 
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import com.mydishes.mydishes.Models.ProductsManager;
 import com.mydishes.mydishes.Parser.EdostavkaParser;
+import com.mydishes.mydishes.Parser.Parser;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
-
 public class EdostavkaParserTest {
+
+    private Parser parser;
+    private ProductsManager.Product testProduct;
 
     @Before
     public void setUp() {
-        ProductsManager.clear(); // Чистим список перед каждым тестом
+        ProductsManager.clear();
+        parser = new EdostavkaParser();
+
+        testProduct = new ProductsManager.Product();
+        testProduct.setProductURL("https://edostavka.by/product/11086");
     }
 
     @Test
-    public void testFindReturnsResults() throws IOException {
-        String query = "колбаса мортаделла";
+    public void testFindProductsReturnsResults() throws Exception {
+        String query = "Молоко";
 
-        long start = System.nanoTime();
-        EdostavkaParser.find(query);
-        long end = System.nanoTime();
-
-        double seconds = (end - start) / 1_000_000_000.0;
-        System.out.printf("Время запроса -> %.3f секунд%n", seconds);
+        parser.findProducts(query);
 
         int size = ProductsManager.size();
-
-        // Проверяем, что список не пустой
-        assertNotNull(size);
-        assertNotEquals("Список пуст — либо сайт не вернул данные, либо парсинг не сработал", 0, size);
+        assertTrue("Нет результатов", size > 0);
 
         System.out.println("Найдено объектов: " + size);
 
-        // Выводим примеры для визуальной проверки
-        for (int i = 0; i < Math.min(5, size); i++) {
+        // Выводим первые 5 результатов
+        for (int i = 0; i < Math.min(size, 5); i++) {
             ProductsManager.Product product = ProductsManager.get(i);
+            System.out.println("[" + (i + 1) + "]");
             System.out.println("Название: " + product.getName());
             System.out.println("Ссылка: " + product.getProductURL());
             System.out.println("Изображение: " + product.getImageURL());
+            System.out.println();
         }
+    }
+
+    @Test
+    public void testParseProductDetails_realSite() throws Exception {
+        ProductsManager.Product result = parser.parseProductDetails(testProduct);
+
+        System.out.println("Калории: " + result.getCalories());
+        System.out.println("Белки: " + result.getProtein());
+        System.out.println("Жиры: " + result.getFat());
+        System.out.println("Углеводы: " + result.getCarb());
+
+        assertTrue(result.getCalories() > 0);
+        assertTrue(result.getProtein() > 0);
+        assertTrue(result.getFat() > 0);
+        assertTrue(result.getCarb() > 0);
     }
 }

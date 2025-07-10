@@ -1,5 +1,7 @@
 package com.mydishes.mydishes.Adapters;
 
+import static com.mydishes.mydishes.utils.ViewUtils.parseFloatSafe;
+
 import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -17,13 +19,22 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
+import com.mydishes.mydishes.Models.DishProductsBuilder;
 import com.mydishes.mydishes.Models.ProductsManager;
+import com.mydishes.mydishes.Parser.EdostavkaParser;
+import com.mydishes.mydishes.Parser.Parser;
 import com.mydishes.mydishes.R;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class RecyclerViewDishesAdapter extends RecyclerView.Adapter<RecyclerViewDishesAdapter.DishesViewHolder> {
 
     private final Context context;
+    private final static Parser parser = new EdostavkaParser();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     public RecyclerViewDishesAdapter(Context context) {
         this.context = context;
@@ -84,19 +95,27 @@ public class RecyclerViewDishesAdapter extends RecyclerView.Adapter<RecyclerView
             dialog.setOnShowListener(d -> {
                 Button okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
                 okButton.setOnClickListener(v1 -> {
-                    String input = editText.getText().toString().trim();
+                    String mass = editText.getText().toString().trim();
 
-                    if (input.isEmpty() || input.length() > 7) {
+                    if (mass.isEmpty() || mass.length() > 7) {
                         inputField.setError(context.getString(R.string.error_value));
                     } else {
                         inputField.setError(null);
 
                         // Обработка введённого значения
 
-                        // Делаем запрос к url через product.getProductURL()
-                        // Получаем КБЖУ продукта
-                        // Дозаполняем поля product инфой о КБЖУ
-                        // Добавляем именно этот product в список продуктов текущего блюда
+                        executor.submit(() -> {
+                            ProductsManager.Product fillsProduct;
+                            try {
+                                fillsProduct = parser.parseProductDetails(product);
+                            } catch (Exception e) {
+                                runOnUiThread(() -> Snackbar.make(v1, "Ошибка! " + e, Snackbar.LENGTH_LONG).show());
+                                return;
+                            }
+                            fillsProduct.setMass(parseFloatSafe(mass));
+
+                            DishProductsBuilder.add(fillsProduct);
+                        });
 
                         dialog.dismiss();
                     }
