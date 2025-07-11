@@ -25,6 +25,8 @@ import com.mydishes.mydishes.Models.DishProductsBuilder;
 import com.mydishes.mydishes.Models.ProductsManager;
 import com.mydishes.mydishes.Parser.EdostavkaParser;
 import com.mydishes.mydishes.Parser.Parser;
+import com.mydishes.mydishes.Parser.ProductFindCallback;
+import com.mydishes.mydishes.Parser.ProductParseCallback;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -41,10 +43,10 @@ public class AddActivity extends AppCompatActivity {
 
     private final Handler handler = new Handler();
     private Runnable searchRunnable;
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
     private TextView textViewNothing;
+    private RecyclerViewDishesAdapter adapter;
     private final Parser parser = new EdostavkaParser();
 
     @Override
@@ -61,6 +63,9 @@ public class AddActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerView);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+
+        adapter = new RecyclerViewDishesAdapter(this);
+        recyclerView.setAdapter(adapter);
 
         SearchBar searchBar = findViewById(R.id.searchBar);
         SearchView searchView = findViewById(R.id.searchView);
@@ -114,27 +119,28 @@ public class AddActivity extends AppCompatActivity {
     }
 
     public void runSearch(String query) {
-        executor.submit(() -> {
-            try {
-                parser.findProducts(query); // фоновый парсинг
-            } catch (Exception e) {
+        parser.findProductsAsync(query, new ProductFindCallback() {
+            @Override
+            public void onSuccess() {
+                runOnUiThread(() -> {
+                    // Обновляем адаптер списка
+                    progressBar.setVisibility(View.INVISIBLE);
+                    if (ProductsManager.isEmpty()) {
+                        textViewNothing.setVisibility(View.VISIBLE);
+                    } else {
+                        adapter.updateData();
+                        recyclerView.setVisibility(View.VISIBLE);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(Exception e) {
                 runOnUiThread(() -> {
                     progressBar.setVisibility(View.INVISIBLE);
                     Snackbar.make(findViewById(android.R.id.content), "Ошибка! " + e, Snackbar.LENGTH_LONG).show();
                 });
-                return; // выходим, чтобы не показывать "Найдено: ..."
             }
-
-            runOnUiThread(() -> {
-                // Обновляем адаптер списка
-                progressBar.setVisibility(View.INVISIBLE);
-                if (ProductsManager.isEmpty()) {
-                    textViewNothing.setVisibility(View.VISIBLE);
-                } else {
-                    recyclerView.setAdapter(new RecyclerViewDishesAdapter(this));
-                    recyclerView.setVisibility(View.VISIBLE);
-                }
-            });
         });
     }
 }

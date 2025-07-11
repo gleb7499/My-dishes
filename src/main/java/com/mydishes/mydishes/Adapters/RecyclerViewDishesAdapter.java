@@ -2,6 +2,8 @@ package com.mydishes.mydishes.Adapters;
 
 import static com.mydishes.mydishes.utils.ViewUtils.parseFloatSafe;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -25,8 +27,10 @@ import com.mydishes.mydishes.Models.DishProductsBuilder;
 import com.mydishes.mydishes.Models.ProductsManager;
 import com.mydishes.mydishes.Parser.EdostavkaParser;
 import com.mydishes.mydishes.Parser.Parser;
+import com.mydishes.mydishes.Parser.ProductParseCallback;
 import com.mydishes.mydishes.R;
 
+import java.util.EmptyStackException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -34,10 +38,9 @@ public class RecyclerViewDishesAdapter extends RecyclerView.Adapter<RecyclerView
 
     private final Context context;
     private final static Parser parser = new EdostavkaParser();
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    public RecyclerViewDishesAdapter(Context context) {
-        this.context = context;
+    public RecyclerViewDishesAdapter(@NonNull Activity activity) {
+        this.context = activity;
     }
 
     @NonNull
@@ -104,20 +107,26 @@ public class RecyclerViewDishesAdapter extends RecyclerView.Adapter<RecyclerView
 
                         // Обработка введённого значения
 
-                        executor.submit(() -> {
-                            ProductsManager.Product fillsProduct;
-                            try {
-                                fillsProduct = parser.parseProductDetails(product);
-                            } catch (Exception e) {
-                                runOnUiThread(() -> Snackbar.make(v1, "Ошибка! " + e, Snackbar.LENGTH_LONG).show());
-                                return;
+                        parser.parseProductDetailsAsync(product, new ProductParseCallback() {
+                            @Override
+                            public void onSuccess(ProductsManager.Product product) {
+                                product.setMass(parseFloatSafe(mass));
+                                DishProductsBuilder.add(product);
                             }
-                            fillsProduct.setMass(parseFloatSafe(mass));
 
-                            DishProductsBuilder.add(fillsProduct);
+                            @Override
+                            public void onError(Exception e) {
+                                if (context instanceof Activity) {
+                                    ((Activity) context).runOnUiThread(() ->
+                                            Snackbar.make(v1, "Ошибка: " + e.getMessage(), Snackbar.LENGTH_LONG).show()
+                                    );
+                                }
+                            }
                         });
 
                         dialog.dismiss();
+
+                        Snackbar.make(v, "Записан", Snackbar.LENGTH_LONG).show();
                     }
                 });
             });
@@ -130,6 +139,11 @@ public class RecyclerViewDishesAdapter extends RecyclerView.Adapter<RecyclerView
     @Override
     public int getItemCount() {
         return ProductsManager.size();
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void updateData() {
+        notifyDataSetChanged();
     }
 
     public static final class DishesViewHolder extends RecyclerView.ViewHolder {

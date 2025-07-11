@@ -18,7 +18,8 @@ public class EdostavkaParser extends Parser {
     private static final String SEARCH_URL = BASE_URL + "/search?query=";
 
     /**
-     * Метод парсинга для получения списка продуктов путем поиска
+     * Метод парсинга для получения списка продуктов путем поиска. После парсинга заполняется список
+     * продуктов через ProductsManager.
      *
      * @param query поисковый запрос
      */
