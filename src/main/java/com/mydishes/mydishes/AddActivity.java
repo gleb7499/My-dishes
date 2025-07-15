@@ -4,8 +4,6 @@ import static com.mydishes.mydishes.utils.ViewUtils.applyInsets;
 
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -22,14 +20,14 @@ import com.google.android.material.search.SearchView;
 import com.google.android.material.snackbar.Snackbar;
 import com.mydishes.mydishes.Adapters.RecyclerViewDishesAdapter;
 import com.mydishes.mydishes.Models.DishProductsBuilder;
-import com.mydishes.mydishes.Models.ProductsManager;
+import com.mydishes.mydishes.Models.Product;
 import com.mydishes.mydishes.Parser.EdostavkaParser;
 import com.mydishes.mydishes.Parser.Parser;
 import com.mydishes.mydishes.Parser.ProductFindCallback;
-import com.mydishes.mydishes.Parser.ProductParseCallback;
+import com.mydishes.mydishes.utils.TextWatcherUtils;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AddActivity extends AppCompatActivity {
 
@@ -48,6 +46,7 @@ public class AddActivity extends AppCompatActivity {
     private TextView textViewNothing;
     private RecyclerViewDishesAdapter adapter;
     private final Parser parser = new EdostavkaParser();
+    private final List<Product> products = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +63,7 @@ public class AddActivity extends AppCompatActivity {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 
-        adapter = new RecyclerViewDishesAdapter(this);
+        adapter = new RecyclerViewDishesAdapter(this, products);
         recyclerView.setAdapter(adapter);
 
         SearchBar searchBar = findViewById(R.id.searchBar);
@@ -74,37 +73,26 @@ public class AddActivity extends AppCompatActivity {
 
         applyInsets(findViewById(R.id.searchLayout), true, false, false, false);
 
-        searchView.getEditText().addTextChangedListener(new TextWatcher() {
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                String query = s.toString().trim();
+        TextWatcherUtils.addSimpleTextWatcher(searchView.getEditText(), s -> {
+            String query = s.trim();
 
-                if (query.length() > 1) {
-                    progressBar.setVisibility(View.VISIBLE);
-                    textViewNothing.setVisibility(View.INVISIBLE);
-                    recyclerView.setVisibility(View.INVISIBLE);
+            if (query.length() > 1) {
+                progressBar.setVisibility(View.VISIBLE);
+                textViewNothing.setVisibility(View.INVISIBLE);
+                recyclerView.setVisibility(View.INVISIBLE);
+            }
+
+            if (searchRunnable != null) {
+                handler.removeCallbacks(searchRunnable); // Отменяем прошлую попытку
+            }
+
+            searchRunnable = () -> {
+                if (query.length() > 1) { // Не парсим по 1 букве
+                    runSearch(query);
                 }
+            };
 
-                if (searchRunnable != null) {
-                    handler.removeCallbacks(searchRunnable); // Отменяем прошлую попытку
-                }
-
-                searchRunnable = () -> {
-                    if (query.length() > 1) { // Не парсим по 1 букве
-                        runSearch(query);
-                    }
-                };
-
-                handler.postDelayed(searchRunnable, 500); // задержка после последнего ввода
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
+            handler.postDelayed(searchRunnable, 500); // задержка после последнего ввода
         });
 
         FloatingActionButton productListButton = findViewById(R.id.productListButton);
@@ -119,27 +107,23 @@ public class AddActivity extends AppCompatActivity {
     }
 
     public void runSearch(String query) {
-        parser.findProductsAsync(query, new ProductFindCallback() {
+        parser.findProductsAsync(this, query, new ProductFindCallback() {
             @Override
-            public void onSuccess() {
-                runOnUiThread(() -> {
-                    // Обновляем адаптер списка
-                    progressBar.setVisibility(View.INVISIBLE);
-                    if (ProductsManager.isEmpty()) {
-                        textViewNothing.setVisibility(View.VISIBLE);
-                    } else {
-                        adapter.updateData();
-                        recyclerView.setVisibility(View.VISIBLE);
-                    }
-                });
+            public void onSuccess(List<Product> products) {
+                // Обновляем адаптер списка
+                progressBar.setVisibility(View.INVISIBLE);
+                if (products.isEmpty()) {
+                    textViewNothing.setVisibility(View.VISIBLE);
+                } else {
+                    adapter.submitList(products);
+                    recyclerView.setVisibility(View.VISIBLE);
+                }
             }
 
             @Override
             public void onError(Exception e) {
-                runOnUiThread(() -> {
-                    progressBar.setVisibility(View.INVISIBLE);
-                    Snackbar.make(findViewById(android.R.id.content), "Ошибка! " + e, Snackbar.LENGTH_LONG).show();
-                });
+                progressBar.setVisibility(View.INVISIBLE);
+                Snackbar.make(findViewById(android.R.id.content), "Ошибка! " + e, Snackbar.LENGTH_LONG).show();
             }
         });
     }

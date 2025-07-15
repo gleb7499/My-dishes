@@ -2,7 +2,7 @@ package com.mydishes.mydishes.Parser;
 
 import static com.mydishes.mydishes.utils.ViewUtils.parseFloatSafe;
 
-import com.mydishes.mydishes.Models.ProductsManager;
+import com.mydishes.mydishes.Models.Product;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -11,23 +11,19 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EdostavkaParser extends Parser {
 
     private static final String BASE_URL = "https://edostavka.by";
     private static final String SEARCH_URL = BASE_URL + "/search?query=";
 
-    /**
-     * Метод парсинга для получения списка продуктов путем поиска. После парсинга заполняется список
-     * продуктов через ProductsManager.
-     *
-     * @param query поисковый запрос
-     */
+
     @Override
-    public void findProducts(String query) throws IOException {
+    public List<Product> findProducts(String query) throws IOException {
 
-        ProductsManager.clear();
-
+        List<Product> products = new ArrayList<>(MAX_RESULTS);
 
         String url = SEARCH_URL + URLEncoder.encode(query, "UTF-8");
 
@@ -36,11 +32,11 @@ public class EdostavkaParser extends Parser {
                 .timeout(20000)
                 .get();
 
-        Elements products = doc.select(".adult-wrapper_adult__eCCJW.vertical_product__Q8mUI");
+        Elements productsSel = doc.select(".adult-wrapper_adult__eCCJW.vertical_product__Q8mUI");
 
         int count = 0;
 
-        for (Element item : products) {
+        for (Element item : productsSel) {
 
             if (count >= MAX_RESULTS) {
                 break; // Достигли лимита, выходим из цикла
@@ -61,25 +57,22 @@ public class EdostavkaParser extends Parser {
                 productName = Jsoup.parse(imageContainer.attr("alt")).text().replaceAll("\\u00AD", "").trim();
             }
 
-            ProductsManager.Product product = new ProductsManager.Product();
+            Product product = new Product();
             product.setProductURL(productUrl);
             product.setImageURL(imageUrl);
             product.setName(productName);
 
-            ProductsManager.add(product);
+            products.add(product);
 
             count++;
         }
+
+        return products;
     }
 
-    /**
-     * Метод для парсинга страницы конкретного продукта и заполнения его КБЖУ.
-     *
-     * @param product объект продукта, содержащий URL
-     * @return обновлённый продукт с заполненными значениями КБЖУ
-     */
+
     @Override
-    public ProductsManager.Product parseProductDetails(ProductsManager.Product product) throws IOException {
+    public Product parseProductDetails(Product product) throws IOException {
         String url = product.getProductURL();
 
         Document doc = Jsoup.connect(url)
