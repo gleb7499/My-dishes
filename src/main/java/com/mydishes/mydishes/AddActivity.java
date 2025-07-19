@@ -4,7 +4,6 @@ import static com.mydishes.mydishes.utils.ViewUtils.applyInsets;
 
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -18,8 +17,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.search.SearchBar;
 import com.google.android.material.search.SearchView;
 import com.google.android.material.snackbar.Snackbar;
-import com.mydishes.mydishes.Adapters.RecyclerViewDishesAdapter;
-import com.mydishes.mydishes.Models.DishProductsBuilder;
+import com.mydishes.mydishes.Adapters.ProductFindListAdapter;
+import com.mydishes.mydishes.Adapters.ProductSelectedAdapter;
 import com.mydishes.mydishes.Models.Product;
 import com.mydishes.mydishes.Parser.EdostavkaParser;
 import com.mydishes.mydishes.Parser.Parser;
@@ -41,12 +40,13 @@ public class AddActivity extends AppCompatActivity {
 
     private final Handler handler = new Handler();
     private Runnable searchRunnable;
-    private RecyclerView recyclerView;
     private ProgressBar progressBar;
     private TextView textViewNothing;
-    private RecyclerViewDishesAdapter adapter;
+    private RecyclerView addProductsRecycler;
+    private ProductFindListAdapter productFindListAdapter;
+    private RecyclerView selectedProductsRecycler;
+    private ProductSelectedAdapter productSelectedAdapter;
     private final Parser parser = new EdostavkaParser();
-    private final List<Product> products = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,12 +59,12 @@ public class AddActivity extends AppCompatActivity {
 
         progressBar = findViewById(R.id.progressBar);
         textViewNothing = findViewById(R.id.textViewNothing);
-        recyclerView = findViewById(R.id.recyclerView);
+        addProductsRecycler = findViewById(R.id.add_products_recycler);
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        addProductsRecycler.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 
-        adapter = new RecyclerViewDishesAdapter(this, products);
-        recyclerView.setAdapter(adapter);
+        productFindListAdapter = new ProductFindListAdapter(this, new ArrayList<>());
+        addProductsRecycler.setAdapter(productFindListAdapter);
 
         SearchBar searchBar = findViewById(R.id.searchBar);
         SearchView searchView = findViewById(R.id.searchView);
@@ -79,7 +79,7 @@ public class AddActivity extends AppCompatActivity {
             if (query.length() > 1) {
                 progressBar.setVisibility(View.VISIBLE);
                 textViewNothing.setVisibility(View.INVISIBLE);
-                recyclerView.setVisibility(View.INVISIBLE);
+                addProductsRecycler.setVisibility(View.INVISIBLE);
             }
 
             if (searchRunnable != null) {
@@ -95,14 +95,14 @@ public class AddActivity extends AppCompatActivity {
             handler.postDelayed(searchRunnable, 500); // задержка после последнего ввода
         });
 
+
         FloatingActionButton productListButton = findViewById(R.id.productListButton);
 
         applyInsets(productListButton, false, true, false, true);
 
         productListButton.setOnClickListener(v -> {
-            for (int i = 0; i < DishProductsBuilder.size(); ++i) {
-                Log.d("DishProductsBuilder", DishProductsBuilder.get(i).toString());
-            }
+            ViewAddedFragment bottomSheet = new ViewAddedFragment();
+            bottomSheet.show(getSupportFragmentManager(), bottomSheet.getTag());
         });
     }
 
@@ -115,8 +115,8 @@ public class AddActivity extends AppCompatActivity {
                 if (products.isEmpty()) {
                     textViewNothing.setVisibility(View.VISIBLE);
                 } else {
-                    adapter.submitList(products);
-                    recyclerView.setVisibility(View.VISIBLE);
+                    productFindListAdapter.submitList(products);
+                    addProductsRecycler.setVisibility(View.VISIBLE);
                 }
             }
 

@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">My dishes</string>
-    <string name="fab_content_desc">Добавление нового продукта</string>
+    <string name="fab_content_desc">Список добавленнх продуктов</string>
     <string name="add_new_dishes">Add new dishes</string>
     <string name="my_dishes">Мои блюда</string>
     <!-- Strings used for fragments for navigation -->
@@ -54,4 +54,8 @@
     <string name="ok">Oк</string>
     <string name="error_value">Неверное значение</string>
     <string name="cancel">Назад</string>
+    <string name="drag_handle_desc">Перетащите ручку для изменения положения нижней панели</string>
+    <string name="addedProducts">Добавленные продукты</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

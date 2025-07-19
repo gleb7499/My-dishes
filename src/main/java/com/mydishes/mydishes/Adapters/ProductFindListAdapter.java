@@ -21,7 +21,7 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
-import com.mydishes.mydishes.Models.DishProductsBuilder;
+import com.mydishes.mydishes.Models.SelectedProductsManager;
 import com.mydishes.mydishes.Models.Product;
 import com.mydishes.mydishes.Parser.EdostavkaParser;
 import com.mydishes.mydishes.Parser.Parser;
@@ -31,13 +31,13 @@ import com.mydishes.mydishes.utils.TextWatcherUtils;
 
 import java.util.List;
 
-public class RecyclerViewDishesAdapter extends RecyclerView.Adapter<RecyclerViewDishesAdapter.DishesViewHolder> {
+public class ProductFindListAdapter extends RecyclerView.Adapter<ProductFindListAdapter.ProductFindViewHolder> {
 
     private final Context context;
     private final static Parser parser = new EdostavkaParser();
     private final List<Product> products;
 
-    public RecyclerViewDishesAdapter(@NonNull Activity activity, List<Product> products) {
+    public ProductFindListAdapter(@NonNull Activity activity, List<Product> products) {
         this.context = activity;
         this.products = products;
     }
@@ -51,13 +51,13 @@ public class RecyclerViewDishesAdapter extends RecyclerView.Adapter<RecyclerView
 
     @NonNull
     @Override
-    public DishesViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.recycler_view_dishes, parent, false);
-        return new DishesViewHolder(view);
+    public ProductFindViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(context).inflate(R.layout.recycler_view_find_products, parent, false);
+        return new ProductFindViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull DishesViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ProductFindViewHolder holder, int position) {
         // Получаем и устанавливаем данные
         Product product = products.get(position);
 
@@ -107,7 +107,7 @@ public class RecyclerViewDishesAdapter extends RecyclerView.Adapter<RecyclerView
                             @Override
                             public void onSuccess(Product product) {
                                 product.setMass(parseFloatSafe(mass));
-                                DishProductsBuilder.add(product);
+                                SelectedProductsManager.add(product);
                             }
 
                             @Override
@@ -135,14 +135,14 @@ public class RecyclerViewDishesAdapter extends RecyclerView.Adapter<RecyclerView
         return products.size();
     }
 
-    public static final class DishesViewHolder extends RecyclerView.ViewHolder {
+    public static final class ProductFindViewHolder extends RecyclerView.ViewHolder {
         private final ImageView imageView;
         private final TextView textView;
 
-        public DishesViewHolder(View view) {
+        public ProductFindViewHolder(View view) {
             super(view);
             imageView = view.findViewById(R.id.imageView);
-            textView = view.findViewById(R.id.textView);
+            textView = view.findViewById(R.id.textViewName);
         }
     }
 }

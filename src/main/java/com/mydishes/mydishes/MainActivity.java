@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         LinearLayout linearLayout = findViewById(R.id.linear_layout);
-        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        RecyclerView recyclerView = findViewById(R.id.add_products_recycler);
         ImageButton imageButton = findViewById(R.id.addButton);
 
         ViewUtils.applyInsets(linearLayout, true, false, false, false);
