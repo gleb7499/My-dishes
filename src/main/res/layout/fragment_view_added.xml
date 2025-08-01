@@ -2,9 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:background="?attr/colorSurface">
+    android:background="?attr/colorSurface"
+    android:orientation="vertical">
 
     <!-- Drag Handle -->
     <com.google.android.material.bottomsheet.BottomSheetDragHandleView
@@ -18,15 +17,16 @@
         android:id="@+id/selected_products_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/addedProducts"
         android:gravity="center"
-        android:paddingBottom="12dp" />
+        android:paddingBottom="12dp"
+        android:text="@string/addedProducts"
+        android:textSize="20sp" />
 
     <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/selected_products_recycler"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="400dp"
         android:clipToPadding="false"
         android:overScrollMode="ifContentScrolls" />
 </LinearLayout>

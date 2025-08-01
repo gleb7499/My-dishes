@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.mydishes.mydishes.Adapters.ProductSelectedAdapter;
@@ -27,7 +28,7 @@ public class ViewAddedFragment extends BottomSheetDialogFragment {
     @Override
     public void onResume() {
         super.onResume();
-
+        adapter.submitList(SelectedProductsManager.getAll());
     }
 
     @Nullable
@@ -35,10 +36,13 @@ public class ViewAddedFragment extends BottomSheetDialogFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         binding = FragmentViewAddedBinding.inflate(inflater, container, false);
-        adapter = new ProductSelectedAdapter(requireContext(), SelectedProductsManager.getAll());
+        binding.selectedProductsRecycler.setLayoutManager(
+                new LinearLayoutManager(requireContext())
+        );
+
+        adapter = new ProductSelectedAdapter(requireContext(), new ArrayList<>());
 
         binding.selectedProductsRecycler.setAdapter(adapter);
-        SelectedProductsManager.registerListener(adapter::submitList);
 
         return binding.getRoot();
     }
@@ -46,7 +50,6 @@ public class ViewAddedFragment extends BottomSheetDialogFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        SelectedProductsManager.unregisterListener(adapter::submitList);
         binding = null;
     }
 }
