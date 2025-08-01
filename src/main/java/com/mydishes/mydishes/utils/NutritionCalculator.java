@@ -1,14 +1,13 @@
 package com.mydishes.mydishes.utils;
 
-import com.mydishes.mydishes.Models.Dish;
 import com.mydishes.mydishes.Models.Nutrition;
 import com.mydishes.mydishes.Models.Product;
 
 import java.util.List;
 
-public class DishCalculator {
+public class NutritionCalculator {
 
-    public static Dish calculate(String dishName, String photoUri, List<Product> products) {
+    public static Nutrition calculate(List<Product> products) {
         double kcal = 0, protein = 0, fat = 0, carbs = 0;
 
         for (Product p : products) {
@@ -21,13 +20,22 @@ public class DishCalculator {
             carbs   += n.getCarb() * ratio;
         }
 
-        Nutrition nutrition = new Nutrition(round(kcal), round(protein), round(fat), round(carbs));
-
-        return new Dish(dishName, photoUri, nutrition, products);
+        return new Nutrition(round(kcal), round(protein), round(fat), round(carbs));
     }
 
     private static double round(double value) {
         return Math.round(value * 100) / 100.0;
+    }
+
+    /**
+     * Преобразует строку в float, безопасно.
+     */
+    public static float parseFloatSafe(String text) {
+        try {
+            return (float) Double.parseDouble(text.replace(",", ".").replaceAll("[^\\d.]", ""));
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
 }

@@ -39,15 +39,4 @@ public class ViewUtils {
             return insets;
         });
     }
-
-    /**
-     * Преобразует строку в float, безопасно.
-     */
-    public static float parseFloatSafe(String text) {
-        try {
-            return (float) Double.parseDouble(text.replace(",", ".").replaceAll("[^\\d.]", ""));
-        } catch (NumberFormatException e) {
-            return 0;
-        }
-    }
 }

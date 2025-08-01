@@ -62,4 +62,14 @@ public class Nutrition {
     public int hashCode() {
         return Objects.hash(calories, protein, fat, carb);
     }
+
+    @Override
+    public String toString() {
+        return "Nutrition{" +
+                "calories=" + calories +
+                ", protein=" + protein +
+                ", fat=" + fat +
+                ", carb=" + carb +
+                '}';
+    }
 }

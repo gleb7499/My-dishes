@@ -16,6 +16,10 @@ public class Dish {
         this.products = products;
     }
 
+    public Dish() {
+        // Empty constructor!
+    }
+
     public String getName() {
         return name;
     }
@@ -58,5 +62,15 @@ public class Dish {
     @Override
     public int hashCode() {
         return Objects.hash(name, photoUri, nutrition, products);
+    }
+
+    @Override
+    public String toString() {
+        return "Dish{" +
+                "name='" + name + '\'' +
+                ", photoUri='" + photoUri + '\'' +
+                ", nutrition=" + nutrition +
+                ", products=" + products +
+                '}';
     }
 }

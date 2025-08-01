@@ -1,6 +1,6 @@
 package com.mydishes.mydishes.Adapters;
 
-import static com.mydishes.mydishes.utils.ViewUtils.parseFloatSafe;
+import static com.mydishes.mydishes.utils.NutritionCalculator.parseFloatSafe;
 
 import android.app.Activity;
 import android.content.Context;
@@ -21,8 +21,8 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
-import com.mydishes.mydishes.Models.SelectedProductsManager;
 import com.mydishes.mydishes.Models.Product;
+import com.mydishes.mydishes.Models.ProductsSelectedManager;
 import com.mydishes.mydishes.Parser.EdostavkaParser;
 import com.mydishes.mydishes.Parser.Parser;
 import com.mydishes.mydishes.Parser.ProductParseCallback;
@@ -71,20 +71,20 @@ public class ProductFindListAdapter extends RecyclerView.Adapter<ProductFindList
 
         // Создаем диалог с вводом массы и обрабытваем его логику
         holder.itemView.setOnClickListener(v -> {
-            View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_input_mass, null);
+            View dialogViewMass = LayoutInflater.from(context).inflate(R.layout.dialog_input_mass, null);
 
-            TextInputLayout inputField = dialogView.findViewById(R.id.inputMass);
-            EditText editText = inputField.getEditText();
+            TextInputLayout inputFieldMass = dialogViewMass.findViewById(R.id.inputMass);
+            EditText editTextMass = inputFieldMass.getEditText();
 
-            if (editText == null) return;
+            if (editTextMass == null) return;
 
-            TextWatcherUtils.addSimpleTextWatcher(editText, s -> editText.setError(null));
+            TextWatcherUtils.addSimpleTextWatcher(editTextMass, s -> editTextMass.setError(null));
 
             // Диалог для ввода массы выбранного продукта
             AlertDialog dialog = new MaterialAlertDialogBuilder(context)
                     .setTitle(R.string.enter_products_mass)
                     .setMessage(product.getName())
-                    .setView(dialogView)
+                    .setView(dialogViewMass)
                     .setPositiveButton(R.string.ok, null) // временно null!
                     .setNegativeButton(R.string.cancel, (d, w) -> d.dismiss())
                     .create();
@@ -93,12 +93,12 @@ public class ProductFindListAdapter extends RecyclerView.Adapter<ProductFindList
             dialog.setOnShowListener(d -> {
                 Button okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
                 okButton.setOnClickListener(v1 -> {
-                    String mass = editText.getText().toString().trim();
+                    String mass = editTextMass.getText().toString().trim();
 
                     if (mass.isEmpty() || mass.length() > 7) {
-                        inputField.setError(context.getString(R.string.error_value));
+                        inputFieldMass.setError(context.getString(R.string.error_value));
                     } else {
-                        inputField.setError(null);
+                        inputFieldMass.setError(null);
 
                         // Обработка введённого значения
 
@@ -107,7 +107,7 @@ public class ProductFindListAdapter extends RecyclerView.Adapter<ProductFindList
                             @Override
                             public void onSuccess(Product product) {
                                 product.setMass(parseFloatSafe(mass));
-                                SelectedProductsManager.add(product);
+                                ProductsSelectedManager.add(product);
                             }
 
                             @Override

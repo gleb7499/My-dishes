@@ -3,7 +3,7 @@ package com.mydishes.mydishes.Models;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SelectedProductsManager {
+public class ProductsSelectedManager {
 
     private static final List<Product> products = new ArrayList<>();
 

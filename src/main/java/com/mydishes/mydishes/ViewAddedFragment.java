@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.mydishes.mydishes.Adapters.ProductSelectedAdapter;
-import com.mydishes.mydishes.Models.SelectedProductsManager;
+import com.mydishes.mydishes.Models.ProductsSelectedManager;
 import com.mydishes.mydishes.databinding.FragmentViewAddedBinding;
 import com.mydishes.mydishes.utils.ViewUtils;
 
@@ -39,7 +39,7 @@ public class ViewAddedFragment extends BottomSheetDialogFragment {
     @Override
     public void onResume() {
         super.onResume();
-        adapter.submitList(SelectedProductsManager.getAll());
+        adapter.submitList(ProductsSelectedManager.getAll());
     }
 
     @Nullable

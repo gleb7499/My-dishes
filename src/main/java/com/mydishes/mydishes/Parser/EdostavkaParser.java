@@ -1,6 +1,6 @@
 package com.mydishes.mydishes.Parser;
 
-import static com.mydishes.mydishes.utils.ViewUtils.parseFloatSafe;
+import static com.mydishes.mydishes.utils.NutritionCalculator.parseFloatSafe;
 
 import com.mydishes.mydishes.Models.Nutrition;
 import com.mydishes.mydishes.Models.Product;
