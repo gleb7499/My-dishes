@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?attr/colorSurface"
@@ -20,13 +21,27 @@
         android:gravity="center"
         android:paddingBottom="12dp"
         android:text="@string/addedProducts"
-        android:textSize="20sp" />
+        android:textSize="24sp" />
 
     <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/selected_products_recycler"
         android:layout_width="match_parent"
-        android:layout_height="400dp"
+        android:layout_height="450dp"
+        android:layout_marginBottom="12dp"
         android:clipToPadding="false"
         android:overScrollMode="ifContentScrolls" />
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/addProductButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:backgroundTint="?attr/colorSurface"
+        android:contentDescription="@string/add_choosing_products_button"
+        android:text="@string/add_button"
+        android:textColor="?attr/colorOnSurface"
+        android:textSize="16sp"
+        app:icon="@drawable/baseline_add_24" />
+
 </LinearLayout>

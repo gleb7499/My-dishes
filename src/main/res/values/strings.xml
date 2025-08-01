@@ -58,4 +58,6 @@
     <string name="addedProducts">Добавленные продукты</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="add_choosing_products_button">Кнопка для добавления выбранных продуктов</string>
+    <string name="add_button">Добавить</string>
 </resources>

@@ -13,10 +13,21 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.mydishes.mydishes.Adapters.ProductSelectedAdapter;
 import com.mydishes.mydishes.Models.SelectedProductsManager;
 import com.mydishes.mydishes.databinding.FragmentViewAddedBinding;
+import com.mydishes.mydishes.utils.ViewUtils;
 
 import java.util.ArrayList;
 
 public class ViewAddedFragment extends BottomSheetDialogFragment {
+
+    public interface OnConfirmListener {
+        void onConfirmed();
+    }
+
+    private OnConfirmListener listener;
+
+    public void setOnConfirmListener(OnConfirmListener listener) {
+        this.listener = listener;
+    }
 
     private FragmentViewAddedBinding binding;
     private ProductSelectedAdapter adapter;
@@ -43,6 +54,15 @@ public class ViewAddedFragment extends BottomSheetDialogFragment {
         adapter = new ProductSelectedAdapter(requireContext(), new ArrayList<>());
 
         binding.selectedProductsRecycler.setAdapter(adapter);
+
+        ViewUtils.applyInsets(binding.addProductButton, false, true, false, false);
+
+        binding.addProductButton.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onConfirmed();  // 💡 Сообщаем активити
+            }
+            dismiss(); // закрываем bottom sheet
+        });
 
         return binding.getRoot();
     }

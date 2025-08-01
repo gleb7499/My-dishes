@@ -2,6 +2,7 @@ package com.mydishes.mydishes.Adapters;
 
 import static org.junit.Assert.assertTrue;
 
+import com.mydishes.mydishes.Models.Nutrition;
 import com.mydishes.mydishes.Models.Product;
 import com.mydishes.mydishes.Parser.EdostavkaParser;
 import com.mydishes.mydishes.Parser.Parser;
@@ -50,14 +51,16 @@ public class EdostavkaParserTest {
     public void testParseProductDetails_realSite() throws Exception {
         Product result = parser.parseProductDetails(testProduct);
 
-        System.out.println("Калории: " + result.getCalories());
-        System.out.println("Белки: " + result.getProtein());
-        System.out.println("Жиры: " + result.getFat());
-        System.out.println("Углеводы: " + result.getCarb());
+        Nutrition nutrition = result.getNutrition();
 
-        assertTrue(result.getCalories() > 0);
-        assertTrue(result.getProtein() > 0);
-        assertTrue(result.getFat() > 0);
-        assertTrue(result.getCarb() > 0);
+        System.out.println("Калории: " + nutrition.getCalories());
+        System.out.println("Белки: " + nutrition.getProtein());
+        System.out.println("Жиры: " + nutrition.getFat());
+        System.out.println("Углеводы: " + nutrition.getCarb());
+
+        assertTrue(nutrition.getCalories() > 0);
+        assertTrue(nutrition.getProtein() > 0);
+        assertTrue(nutrition.getFat() > 0);
+        assertTrue(nutrition.getCarb() > 0);
     }
 }

@@ -2,6 +2,7 @@ package com.mydishes.mydishes.Parser;
 
 import static com.mydishes.mydishes.utils.ViewUtils.parseFloatSafe;
 
+import com.mydishes.mydishes.Models.Nutrition;
 import com.mydishes.mydishes.Models.Product;
 
 import org.jsoup.Jsoup;
@@ -84,6 +85,8 @@ public class EdostavkaParser extends Parser {
 
         if (containers.isEmpty()) throw new IOException("КБЖУ продукта не найдены!");
 
+        Nutrition nutrition = new Nutrition();
+
         for (var item : containers) {
             Element nameBlock = item.selectFirst(".preview_short__value__onntx");
             Element valueBlock = item.selectFirst(".preview_short__key__A6ql0");
@@ -95,19 +98,21 @@ public class EdostavkaParser extends Parser {
             String valueElem = valueBlock.text();
             switch (nameElem) {
                 case "Энергетическая ценность":
-                    product.setCalories(parseFloatSafe(valueElem.split(" ")[0]));
+                    nutrition.setCalories(parseFloatSafe(valueElem.split(" ")[0]));
                     break;
                 case "Белки":
-                    product.setProtein(parseFloatSafe(valueElem));
+                    nutrition.setProtein(parseFloatSafe(valueElem));
                     break;
                 case "Жиры":
-                    product.setFat(parseFloatSafe(valueElem));
+                    nutrition.setFat(parseFloatSafe(valueElem));
                     break;
                 case "Углеводы":
-                    product.setCarb(parseFloatSafe(valueElem));
+                    nutrition.setCarb(parseFloatSafe(valueElem));
                     break;
             }
         }
+
+        product.setNutrition(nutrition);
 
         return product;
     }

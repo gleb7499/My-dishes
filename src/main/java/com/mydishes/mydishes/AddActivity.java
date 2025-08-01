@@ -102,8 +102,23 @@ public class AddActivity extends AppCompatActivity {
 
         productListButton.setOnClickListener(v -> {
             ViewAddedFragment bottomSheet = new ViewAddedFragment();
+
+            bottomSheet.setOnConfirmListener(() -> {
+                // Здесь можно отобразить AlertDialog с полем ввода
+                new androidx.appcompat.app.AlertDialog.Builder(this)
+                        .setTitle("Название блюда")
+                        .setView(new android.widget.EditText(this))
+                        .setPositiveButton("OK", (dialog, which) -> {
+                            // забрать введённый текст и продолжить
+                            
+                        })
+                        .setNegativeButton("Отмена", null)
+                        .show();
+            });
+
             bottomSheet.show(getSupportFragmentManager(), bottomSheet.getTag());
         });
+
     }
 
     public void runSearch(String query) {

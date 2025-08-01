@@ -9,10 +9,7 @@ public class Product {
     private String productURL;
     private String imageURL;
     private String name;
-    private float calories;
-    private float protein;
-    private float fat;
-    private float carb;
+    private Nutrition nutrition;
     private float mass;
 
     public String getProductURL() {
@@ -39,36 +36,12 @@ public class Product {
         this.name = name;
     }
 
-    public float getCalories() {
-        return calories;
+    public Nutrition getNutrition() {
+        return nutrition;
     }
 
-    public void setCalories(float calories) {
-        this.calories = calories;
-    }
-
-    public float getProtein() {
-        return protein;
-    }
-
-    public void setProtein(float protein) {
-        this.protein = protein;
-    }
-
-    public float getFat() {
-        return fat;
-    }
-
-    public void setFat(float fat) {
-        this.fat = fat;
-    }
-
-    public float getCarb() {
-        return carb;
-    }
-
-    public void setCarb(float carb) {
-        this.carb = carb;
+    public void setNutrition(Nutrition nutrition) {
+        this.nutrition = nutrition;
     }
 
     public float getMass() {
@@ -86,10 +59,7 @@ public class Product {
                 "productURL='" + productURL + '\'' +
                 ", imageURL='" + imageURL + '\'' +
                 ", name='" + name + '\'' +
-                ", calories=" + calories +
-                ", protein=" + protein +
-                ", fat=" + fat +
-                ", carb=" + carb +
+                ", nutrition=" + nutrition +
                 ", mass=" + mass +
                 '}';
     }
@@ -98,11 +68,11 @@ public class Product {
     public boolean equals(Object o) {
         if (!(o instanceof Product)) return false;
         Product product = (Product) o;
-        return Float.compare(calories, product.calories) == 0 && Float.compare(protein, product.protein) == 0 && Float.compare(fat, product.fat) == 0 && Float.compare(carb, product.carb) == 0 && Float.compare(mass, product.mass) == 0 && Objects.equals(productURL, product.productURL) && Objects.equals(imageURL, product.imageURL) && Objects.equals(name, product.name);
+        return Float.compare(mass, product.mass) == 0 && Objects.equals(productURL, product.productURL) && Objects.equals(imageURL, product.imageURL) && Objects.equals(name, product.name) && Objects.equals(nutrition, product.nutrition);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(productURL, imageURL, name, calories, protein, fat, carb, mass);
+        return Objects.hash(productURL, imageURL, name, nutrition, mass);
     }
 }
