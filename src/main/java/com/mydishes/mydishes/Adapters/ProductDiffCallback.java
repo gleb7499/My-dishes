@@ -6,6 +6,8 @@ import com.mydishes.mydishes.Models.Product;
 
 import java.util.List;
 
+// Класс для сравнения двух списков значений
+// Основное применение - сравнение в RecyclerView при обновлении данных
 public class ProductDiffCallback extends DiffUtil.Callback {
 
     private final List<Product> oldList;

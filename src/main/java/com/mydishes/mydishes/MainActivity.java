@@ -12,9 +12,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.mydishes.mydishes.utils.ViewUtils;
 
+// Главное окно приложения (отображение списка созданных блюд)
 public class MainActivity extends AppCompatActivity {
+    // Создание активити
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // настройка активити
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);

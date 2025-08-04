@@ -1,13 +1,16 @@
 package com.mydishes.mydishes.Models;
 
+import androidx.annotation.NonNull;
+
 import java.util.List;
 import java.util.Objects;
 
+// Класс-модель для блюда
 public class Dish {
-    private String name;
-    private String photoUri;
-    private Nutrition nutrition;
-    private List<Product> products;
+    private String name; // Наименование
+    private String photoUri; // Ссылка на фото
+    private Nutrition nutrition; // Объект содержания КБЖУ
+    private List<Product> products; // Список продуктов текущего блюда
 
     public Dish(String name, String photoUri, Nutrition nutrition, List<Product> products) {
         this.name = name;
@@ -64,6 +67,7 @@ public class Dish {
         return Objects.hash(name, photoUri, nutrition, products);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "Dish{" +

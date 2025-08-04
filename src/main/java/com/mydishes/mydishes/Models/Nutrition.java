@@ -1,12 +1,15 @@
 package com.mydishes.mydishes.Models;
 
+import androidx.annotation.NonNull;
+
 import java.util.Objects;
 
+// Класс-модель представления КБЖУ блюда/продукта
 public class Nutrition {
-    private double calories;
-    private double protein;
-    private double fat;
-    private double carb;
+    private double calories; // ккалории
+    private double protein; // белки
+    private double fat; // жиры
+    private double carb; // углеводы
 
     public Nutrition(double calories, double protein, double fat, double carb) {
         this.calories = calories;
@@ -63,6 +66,7 @@ public class Nutrition {
         return Objects.hash(calories, protein, fat, carb);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "Nutrition{" +

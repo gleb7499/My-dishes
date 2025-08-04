@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Contract;
 import java.util.ArrayList;
 import java.util.List;
 
+// Класс-менеджер, управляющий единым списком блюд системы
 public class DishesManager {
     public static final List<Dish> dishes = new ArrayList<>();
 
@@ -29,7 +30,7 @@ public class DishesManager {
     @NonNull
     @Contract(" -> new")
     public static List<Dish> getAll() {
-        return new ArrayList<>(dishes);
+        return new ArrayList<>(dishes); // копия, чтобы нельзя было напрямую мутировать
     }
 
     // Логика подписок на изменение централизованного списка блюд

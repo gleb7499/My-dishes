@@ -9,8 +9,10 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.mydishes.mydishes.R;
 
+// Утилитарный класс, в котором общие методы, для всего приложения
 public class ViewUtils {
 
+    // Вставить отступы для системных панелей навигации. boolean указывает, куда нужно их вставить
     public static void applyInsets(View targetView, boolean top, boolean bottom, boolean left, boolean right) {
         ViewCompat.setOnApplyWindowInsetsListener(targetView, (v, insets) -> {
             Insets systemInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars());

@@ -39,11 +39,14 @@ import com.mydishes.mydishes.utils.NutritionCalculator;
 import java.util.ArrayList;
 import java.util.List;
 
+// Класс экрана добавления блюда (поис продуктов, составления списка продуктов, создание блюда)
 public class AddActivity extends AppCompatActivity {
 
+    // Метод уничтожения активити
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        // Удаляем очередь запроса к сайту, если она осталась в памяти
         if (searchRunnable != null) {
             handler.removeCallbacks(searchRunnable);
         }
@@ -54,45 +57,47 @@ public class AddActivity extends AppCompatActivity {
     // Временное отображение в логе!
     private final DishesManager.Action printDishesList = () -> Log.d("My Dishes", DishesManager.dishes.toString());
 
-    private final Handler handler = new Handler();
-    private Runnable searchRunnable;
-    private ProgressBar progressBar;
-    private TextView textViewNothing;
-    private RecyclerView addProductsRecycler;
-    private ProductFindListAdapter productFindListAdapter;
-    FloatingActionButton productListButton;
-    private final Parser parser = new EdostavkaParser();
+    private final Handler handler = new Handler(); // выполнение отложенного запроса к сайту
+    private Runnable searchRunnable; // инструкции отложенного запроса к сайту
+    private ProgressBar progressBar; // загрузка результата запроса
+    private TextView textViewNothing; // отображение надписи о том, что ничего не найдено
+    private RecyclerView addProductsRecycler; // отображение результата поиска (список продуктов)
+    private ProductFindListAdapter productFindListAdapter; // адаптер для RecyclerView
+    FloatingActionButton productListButton; // отображение списка выбранных продуктов
+    private final Parser parser = new EdostavkaParser(); // объект класса парсера
 
+
+    // создали активити
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         DishesManager.subscribe(printDishesList); // Временное отображение в логе!
 
+        // Настройка отображения
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         getWindow().setNavigationBarColor(android.graphics.Color.TRANSPARENT);
         getWindow().setStatusBarColor(android.graphics.Color.TRANSPARENT);
-
         setContentView(R.layout.activity_add);
 
-        progressBar = findViewById(R.id.progressBar);
-        textViewNothing = findViewById(R.id.textViewNothing);
+        // настраиваем RecyclerView
         addProductsRecycler = findViewById(R.id.add_products_recycler);
-
         addProductsRecycler.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-
         productFindListAdapter = new ProductFindListAdapter(this, new ArrayList<>());
         addProductsRecycler.setAdapter(productFindListAdapter);
 
+        // настраиваем поисковую строку, ProgressBar и textViewNothing
         SearchBar searchBar = findViewById(R.id.searchBar);
         SearchView searchView = findViewById(R.id.searchView);
-
         searchView.setupWithSearchBar(searchBar);
-
         applyInsets(findViewById(R.id.searchLayout), true, false, false, false);
+        progressBar = findViewById(R.id.progressBar);
+        textViewNothing = findViewById(R.id.textViewNothing);
 
+        // установка слушателя на изменение текста в строке поиска
         TextWatcherUtils.addSimpleTextWatcher(searchView.getEditText(), s -> {
             String query = s.trim();
 
+            // проверка длины запроса
             if (query.length() > 1) {
                 progressBar.setVisibility(View.VISIBLE);
                 textViewNothing.setVisibility(View.INVISIBLE);
@@ -112,13 +117,9 @@ public class AddActivity extends AppCompatActivity {
             handler.postDelayed(searchRunnable, 500); // задержка после последнего ввода
         });
 
-
-        // Кнопка просмотра выбранных продуктов
+        // настройка кнопки просмотра выбранных продуктов
         productListButton = findViewById(R.id.productListButton);
-
         applyInsets(productListButton, false, true, false, true);
-
-        // Обработка нажатия кнопки
         productListButton.setOnClickListener(v -> {
             // Создаем нижний лист со списком выбранных продуктов и кнопкой "Добавить"
             ViewAddedFragment bottomSheet = new ViewAddedFragment();
@@ -130,22 +131,20 @@ public class AddActivity extends AppCompatActivity {
                4) Добавить объект Dish в централизованный менеджер
             */
             bottomSheet.setOnConfirmListener(() -> {
-                // Надуваем xml с полем для ввода имени
+                // надутие и настройка XML
                 View dialogViewName = LayoutInflater.from(this).inflate(R.layout.dialog_input_name, null);
-
                 TextInputLayout inputFieldName = dialogViewName.findViewById(R.id.inputName);
                 EditText editTextName = inputFieldName.getEditText();
-
                 if (editTextName == null) return;
 
                 // Отключаем отображение старых ошибок
                 TextWatcherUtils.addSimpleTextWatcher(editTextName, s -> editTextName.setError(null));
 
-                // Диалог для ввода name блюда
+                // Диалог для ввода наименования блюда
                 AlertDialog dialog = new MaterialAlertDialogBuilder(this)
                         .setTitle(R.string.enter_products_mass)
                         .setView(dialogViewName)
-                        .setPositiveButton(R.string.ok, null) // временно null!
+                        .setPositiveButton(R.string.ok, null) // временно null! (см. -> .setOnShowListener)
                         .setNegativeButton(R.string.cancel, (d, w) -> d.dismiss())
                         .create();
 
@@ -158,7 +157,6 @@ public class AddActivity extends AppCompatActivity {
                         inputFieldName.setError(getString(R.string.error_value));
                         return;
                     }
-
                     inputFieldName.setError(null);
 
                     // Обработка введенного значения
@@ -178,18 +176,21 @@ public class AddActivity extends AppCompatActivity {
                     this.finish();
                 }));
 
+                // завершаем диалог
                 dialog.show();
             });
 
+            // показываем диалог
             bottomSheet.show(getSupportFragmentManager(), bottomSheet.getTag());
         });
 
     }
 
+    // запуск асинхронного поиска списка продуктов по запросу query с обработкой результата
     public void runSearch(String query) {
         parser.findProductsAsync(this, query, new ProductFindCallback() {
             @Override
-            public void onSuccess(List<Product> products) {
+            public void onSuccess(List<Product> products) { // парсинг успешен
                 // Обновляем адаптер списка
                 progressBar.setVisibility(View.INVISIBLE);
                 if (products.isEmpty()) {
@@ -201,7 +202,7 @@ public class AddActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onError(Exception e) {
+            public void onError(Exception e) { // ошибка парсинга!
                 progressBar.setVisibility(View.INVISIBLE);
                 Snackbar.make(productListButton, "Ошибка! " + e, Snackbar.LENGTH_LONG).show();
             }

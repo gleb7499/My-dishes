@@ -4,13 +4,13 @@ import androidx.annotation.NonNull;
 
 import java.util.Objects;
 
-
+// Класс-модель представления продукта
 public class Product {
-    private String productURL;
-    private String imageURL;
-    private String name;
-    private Nutrition nutrition;
-    private float mass;
+    private String productURL; // ссылка на страницу продукта сайта парсинга
+    private String imageURL; // ссылка на фотографию продукта
+    private String name; // наименование продукта
+    private Nutrition nutrition; // объект КБЖУ
+    private float mass; // масса продукта
 
     public String getProductURL() {
         return productURL;
