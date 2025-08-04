@@ -1,90 +1,56 @@
 package com.mydishes.mydishes.Models;
 
+import androidx.annotation.NonNull;
+
+import org.jetbrains.annotations.Contract;
+
 import java.util.ArrayList;
 import java.util.List;
 
+// Класс-менеджер, управляющий единым списком блюд системы
 public class DishesManager {
-    private static final List<Dish> DISH_LIST = new ArrayList<>();
+    public static final List<Dish> dishes = new ArrayList<>();
 
-    public static void add(Dish dish) {
-        DISH_LIST.add(dish);
+    public static boolean add(Dish dish) {
+        boolean res = dishes.add(dish);
+        notifyChange();
+        return res;
     }
 
-    public static Dish get(int i) {
-        return DISH_LIST.get(i);
-    }
-
-    public static void clear() {
-        DISH_LIST.clear();
+    public static Dish remove(int i) {
+        Dish dish = dishes.remove(i);
+        notifyChange();
+        return dish;
     }
 
     public static int size() {
-        return DISH_LIST.size();
+        return dishes.size();
     }
 
-    public static final class Dish {
-        private String url;
-        private String image;
-        private String name;
-        private short calories;
-        private short protein;
-        private short fat;
-        private short carb;
+    @NonNull
+    @Contract(" -> new")
+    public static List<Dish> getAll() {
+        return new ArrayList<>(dishes); // копия, чтобы нельзя было напрямую мутировать
+    }
 
-        public String getUrl() {
-            return url;
-        }
+    // Логика подписок на изменение централизованного списка блюд
+    public interface Action {
+        void doAction();
+    }
 
-        public void setUrl(String url) {
-            this.url = url;
-        }
+    private static final List<Action> actions = new ArrayList<>();
 
-        public String getImage() {
-            return image;
-        }
+    public static void subscribe(Action action) {
+        if (!actions.contains(action)) actions.add(action);
+    }
 
-        public void setImage(String image) {
-            this.image = image;
-        }
+    public static void removeSubscribe(Action action) {
+        actions.remove(action);
+    }
 
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public short getCalories() {
-            return calories;
-        }
-
-        public void setCalories(short calories) {
-            this.calories = calories;
-        }
-
-        public short getProtein() {
-            return protein;
-        }
-
-        public void setProtein(short protein) {
-            this.protein = protein;
-        }
-
-        public short getFat() {
-            return fat;
-        }
-
-        public void setFat(short fat) {
-            this.fat = fat;
-        }
-
-        public short getCarb() {
-            return carb;
-        }
-
-        public void setCarb(short carb) {
-            this.carb = carb;
+    private static void notifyChange() {
+        for (Action action : actions) {
+            action.doAction();
         }
     }
 }

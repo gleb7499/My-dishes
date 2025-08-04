@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--  Отступы  -->
+    <item name="tag_margin_top" type="id" />
+    <item name="tag_margin_bottom" type="id" />
+    <item name="tag_margin_left" type="id" />
+    <item name="tag_margin_right" type="id" />
+</resources>

@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">My dishes</string>
-    <string name="fab_content_desc">Добавление нового продукта</string>
+    <string name="fab_content_desc">Список добавленнх продуктов</string>
     <string name="add_new_dishes">Add new dishes</string>
     <string name="my_dishes">Мои блюда</string>
     <!-- Strings used for fragments for navigation -->
@@ -47,4 +47,19 @@
     </string>
     <string name="searchbar_hint">Название товара</string>
     <string name="productsPhoto">Фото продукта</string>
+    <string name="NothingFind">Ничего не найдено :(</string>
+    <string name="mass">Масса</string>
+    <string name="gram">грамм</string>
+    <string name="enter_products_mass">Введите массу продукта</string>
+    <string name="ok">Oк</string>
+    <string name="error_value">Неверное значение</string>
+    <string name="cancel">Назад</string>
+    <string name="drag_handle_desc">Перетащите ручку для изменения положения нижней панели</string>
+    <string name="addedProducts">Добавленные продукты</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="add_choosing_products_button">Кнопка для добавления выбранных продуктов</string>
+    <string name="add_button">Добавить</string>
+    <string name="inputName">Название</string>
+    <string name="enter_name_new_dish">Введите название нового блюда</string>
 </resources>
