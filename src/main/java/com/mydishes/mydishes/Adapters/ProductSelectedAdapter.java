@@ -16,6 +16,7 @@ import com.mydishes.mydishes.Models.Product;
 import com.mydishes.mydishes.R;
 
 import java.util.List;
+import java.util.Objects;
 
 // Класс-адаптер для демонстрации выбранных продуктых для нового блюда
 public class ProductSelectedAdapter extends RecyclerView.Adapter<ProductSelectedAdapter.ProductSelectedHolder> {
@@ -31,7 +32,7 @@ public class ProductSelectedAdapter extends RecyclerView.Adapter<ProductSelected
     @NonNull
     @Override
     public ProductSelectedHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.recycler_view_selected_products, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.recycler_view_selected_product, parent, false);
         return new ProductSelectedHolder(view);
     }
 
@@ -62,7 +63,14 @@ public class ProductSelectedAdapter extends RecyclerView.Adapter<ProductSelected
 
     // Обновление списка с учетом предыдущего содержимого
     public void submitList(List<Product> newList) {
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new ProductDiffCallback(currentList, newList));
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(
+                new com.mydishes.mydishes.Utils.GenericDiffCallback<Product>(
+                        currentList,                         // старый список
+                        newList,                             // новый список
+                        (oldProduct, newProduct) -> Objects.equals(oldProduct.getName(), newProduct.getName()), // сравнение ID
+                        Product::equals                           // сравнение содержимого
+                )
+        );
         currentList.clear();
         currentList.addAll(newList);
         diffResult.dispatchUpdatesTo(this);
@@ -80,7 +88,7 @@ public class ProductSelectedAdapter extends RecyclerView.Adapter<ProductSelected
         public ProductSelectedHolder(@NonNull View view) {
             super(view);
             imageView = view.findViewById(R.id.imageView);
-            textViewName = view.findViewById(R.id.textViewName);
+            textViewName = view.findViewById(R.id.nameDish);
             textViewMass = view.findViewById(R.id.textViewMass);
         }
     }

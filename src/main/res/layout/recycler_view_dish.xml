@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/recyclerViewDishes"
+    android:layout_width="match_parent"
+    android:layout_height="110dp"
+    android:backgroundTint="?attr/colorBackgroundFloating">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/imageCard"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:cardBackgroundColor="?attr/colorSurface"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="0dp"
+        app:cardPreventCornerOverlap="false"
+        app:cardUseCompatPadding="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.9"
+        app:layout_constraintHorizontal_bias="0.05"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.25">
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/productsPhoto"
+            android:scaleType="centerCrop" />
+
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/nameDish"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textAlignment="center"
+        android:textColor="?attr/colorOnSurface"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/imageCard"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.1" />
+
+    <TableLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/imageCard"
+        app:layout_constraintTop_toBottomOf="@id/nameDish">
+
+        <TableRow>
+
+            <TextView
+                style="@style/MacroTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/calories" />
+
+            <TextView
+                android:id="@+id/textViewCalories"
+                style="@style/MacroTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                style="@style/MacroTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/protein" />
+
+            <TextView
+                android:id="@+id/textViewProteins"
+                style="@style/MacroTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+        </TableRow>
+
+        <TableRow>
+
+            <TextView
+                style="@style/MacroTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/fat" />
+
+            <TextView
+                android:id="@+id/textViewFats"
+                style="@style/MacroTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                style="@style/MacroTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/carb" />
+
+            <TextView
+                android:id="@+id/textViewCarbs"
+                style="@style/MacroTextView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+        </TableRow>
+    </TableLayout>
+
+    <com.google.android.material.divider.MaterialDivider
+        android:id="@+id/divider"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginHorizontal="20dp"
+        android:alpha="0.7"
+        android:backgroundTint="?attr/colorOnSurface"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageCard" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

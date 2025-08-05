@@ -20,6 +20,8 @@ public class MainActivity extends AppCompatActivity {
         // настройка активити
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+        getWindow().setNavigationBarColor(android.graphics.Color.TRANSPARENT);
+        getWindow().setStatusBarColor(android.graphics.Color.TRANSPARENT);
         setContentView(R.layout.activity_main);
 
         LinearLayout linearLayout = findViewById(R.id.linear_layout);

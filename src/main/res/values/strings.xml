@@ -62,4 +62,9 @@
     <string name="add_button">Добавить</string>
     <string name="inputName">Название</string>
     <string name="enter_name_new_dish">Введите название нового блюда</string>
+    <string name="dish_photo">Фото блюда</string>
+    <string name="calories">Ккал:</string>
+    <string name="protein">Белки:</string>
+    <string name="fat">Жиры:</string>
+    <string name="carb">Углеводы:</string>
 </resources>
