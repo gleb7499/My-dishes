@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -16,8 +17,9 @@ import com.mydishes.mydishes.Models.Dish;
 import com.mydishes.mydishes.Models.Nutrition;
 import com.mydishes.mydishes.R;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 // Класс-адаптер для отображения списка блюд из продуктов
@@ -25,11 +27,61 @@ public class DishesAdapter extends RecyclerView.Adapter<DishesAdapter.DishViewHo
 
     private final Context context;
     private final List<Dish> dishes;
+    private final DecimalFormat decimalFormat;
+    private final OnDishActionClickListener actionClickListener; // Интерфейс для обработки нажатий
 
     // Конструктор
-    public DishesAdapter(Context context, List<Dish> dishes) {
+    public DishesAdapter(Context context, List<Dish> dishes, OnDishActionClickListener listener) {
         this.context = context;
         this.dishes = dishes;
+        this.decimalFormat = new DecimalFormat("#.#"); // Формат: #.# означает необязательный знак после запятой
+        this.decimalFormat.setRoundingMode(RoundingMode.HALF_UP); // Устанавливаем режим округления
+        this.actionClickListener = listener;
+    }
+
+    // Управление данными текущей view
+    @Override
+    public void onBindViewHolder(@NonNull DishViewHolder holder, int position) {
+        // Заполнение view!
+        Dish currentDish = dishes.get(position);
+        Nutrition nutrition = currentDish.getNutrition();
+
+        holder.nameDish.setText(currentDish.getName());
+
+        if (nutrition != null) {
+            holder.calories.setText(decimalFormat.format(nutrition.getCalories()));
+            holder.protein.setText(decimalFormat.format(nutrition.getProtein()));
+            holder.fat.setText(decimalFormat.format(nutrition.getFat()));
+            holder.carb.setText(decimalFormat.format(nutrition.getCarb()));
+        } else {
+            // Handle cases where nutrition information might be missing
+            holder.calories.setText("N/A");
+            holder.protein.setText("N/A");
+            holder.fat.setText("N/A");
+            holder.carb.setText("N/A");
+        }
+
+        // Load image using Glide
+        Glide.with(context)
+                .load(currentDish.getPhotoUri())
+                .placeholder(R.drawable.placeholder) // Optional: a placeholder image
+                .error(R.drawable.error_image) // Optional: an error image
+                .into(holder.imageView);
+
+        // Устанавливаем слушатель долгого нажатия
+        holder.itemView.setOnLongClickListener(v -> {
+            if (actionClickListener != null) {
+                showPopupMenu(holder.itemView, currentDish);
+            }
+            return true; // Возвращаем true, чтобы показать, что событие обработано
+        });
+
+        // Устанавливаем слушатель обычного нажатия
+        holder.itemView.setOnClickListener(v -> {
+            if (actionClickListener != null) {
+                actionClickListener.onDishClick(currentDish);
+            }
+        });
     }
 
     // Обновление списка с учетом предыдущего содержимого
@@ -55,34 +107,35 @@ public class DishesAdapter extends RecyclerView.Adapter<DishesAdapter.DishViewHo
         return new DishViewHolder(view);
     }
 
-    // Управление данными текущей view
-    @Override
-    public void onBindViewHolder(@NonNull DishViewHolder holder, int position) {
-        // Заполнение view!
-        Dish currentDish = dishes.get(position);
-        Nutrition nutrition = currentDish.getNutrition();
+    // Метод для отображения PopupMenu
+    private void showPopupMenu(View view, Dish dish) {
+        PopupMenu popup = new PopupMenu(context, view);
+        popup.getMenuInflater().inflate(R.menu.dish_context_menu, popup.getMenu());
+        popup.setOnMenuItemClickListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == R.id.action_edit_dish) {
+                if (actionClickListener != null) {
+                    actionClickListener.onEditClick(dish);
+                }
+                return true;
+            } else if (itemId == R.id.action_delete_dish) {
+                if (actionClickListener != null) {
+                    actionClickListener.onDeleteClick(dish);
+                }
+                return true;
+            }
+            return false;
+        });
+        popup.show();
+    }
 
-        holder.nameDish.setText(currentDish.getName());
+    // Интерфейс для обработки действий с элементом списка
+    public interface OnDishActionClickListener {
+        void onDishClick(Dish dish); // Для обычного нажатия
 
-        if (nutrition != null) {
-            holder.calories.setText(String.format(Locale.getDefault(), "%.2f", nutrition.getCalories()));
-            holder.protein.setText(String.format(Locale.getDefault(), "%.2f", nutrition.getProtein()));
-            holder.fat.setText(String.format(Locale.getDefault(), "%.2f", nutrition.getFat()));
-            holder.carb.setText(String.format(Locale.getDefault(), "%.2f", nutrition.getCarb()));
-        } else {
-            // Handle cases where nutrition information might be missing
-            holder.calories.setText("N/A");
-            holder.protein.setText("N/A");
-            holder.fat.setText("N/A");
-            holder.carb.setText("N/A");
-        }
+        void onEditClick(Dish dish);
 
-        // Load image using Glide
-        Glide.with(context)
-                .load(currentDish.getPhotoUri())
-                .placeholder(R.drawable.placeholder) // Optional: a placeholder image
-                .error(R.drawable.error_image) // Optional: an error image
-                .into(holder.imageView);
+        void onDeleteClick(Dish dish);
     }
 
     // Размер списка блюд

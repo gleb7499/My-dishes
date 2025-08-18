@@ -67,4 +67,7 @@
     <string name="protein">Белки:</string>
     <string name="fat">Жиры:</string>
     <string name="carb">Углеводы:</string>
+    <string name="action_edit">Изменить\n</string>
+    <string name="action_delete">Удалить</string>
+    <string name="ingredients">Ингредиенты</string>
 </resources>

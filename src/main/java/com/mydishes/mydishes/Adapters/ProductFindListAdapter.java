@@ -1,6 +1,6 @@
 package com.mydishes.mydishes.Adapters;
 
-import static com.mydishes.mydishes.Utils.NutritionCalculator.parseFloatSafe;
+import static com.mydishes.mydishes.Utils.ViewUtils.parseFloatSafe;
 
 import android.app.Activity;
 import android.content.Context;
@@ -63,7 +63,7 @@ public class ProductFindListAdapter extends RecyclerView.Adapter<ProductFindList
     @NonNull
     @Override
     public ProductFindViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.recycler_view_found_product, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.list_item_product, parent, false);
         return new ProductFindViewHolder(view);
     }
 

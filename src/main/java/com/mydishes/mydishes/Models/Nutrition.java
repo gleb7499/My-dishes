@@ -2,6 +2,9 @@ package com.mydishes.mydishes.Models;
 
 import androidx.annotation.NonNull;
 
+import org.jetbrains.annotations.Contract;
+
+import java.util.List;
 import java.util.Objects;
 
 // Класс-модель представления КБЖУ блюда/продукта
@@ -54,10 +57,34 @@ public class Nutrition {
         this.carb = carb;
     }
 
+    // Вычисляет итоговое значение КБЖУ для блюда по списку продуктов
+    @NonNull
+    @Contract("_ -> new")
+    public static Nutrition calculate(@NonNull List<Product> products) {
+        double kcal = 0, protein = 0, fat = 0, carbs = 0;
+
+        for (Product p : products) {
+            double ratio = p.getMass() / 100.0;
+            Nutrition n = p.getNutrition();
+
+            kcal += n.getCalories() * ratio;
+            protein += n.getProtein() * ratio;
+            fat += n.getFat() * ratio;
+            carbs += n.getCarb() * ratio;
+        }
+
+        // Результат -> новый объект Nutrition со значениями КБЖУ блюда
+        return new Nutrition(round(kcal), round(protein), round(fat), round(carbs));
+    }
+
+    // Метод для корректного округления значения
+    private static double round(double value) {
+        return Math.round(value * 100) / 100.0;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Nutrition)) return false;
-        Nutrition nutrition = (Nutrition) o;
+        if (!(o instanceof Nutrition nutrition)) return false;
         return Double.compare(calories, nutrition.calories) == 0 && Double.compare(protein, nutrition.protein) == 0 && Double.compare(fat, nutrition.fat) == 0 && Double.compare(carb, nutrition.carb) == 0;
     }
 

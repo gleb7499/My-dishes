@@ -34,7 +34,6 @@ import com.mydishes.mydishes.Parser.EdostavkaParser;
 import com.mydishes.mydishes.Parser.Parser;
 import com.mydishes.mydishes.Parser.ProductFindCallback;
 import com.mydishes.mydishes.Utils.TextWatcherUtils;
-import com.mydishes.mydishes.Utils.NutritionCalculator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -161,7 +160,7 @@ public class AddActivity extends AppCompatActivity {
 
                     // Обработка введенного значения
                     // Получили итоговые значения КБЖУ для блюда
-                    Nutrition nutrition = NutritionCalculator.calculate(ProductsSelectedManager.getAll());
+                    Nutrition nutrition = Nutrition.calculate(ProductsSelectedManager.getAll());
 
                     // Создали блюдо
                     Dish dish = new Dish(dishName, "", nutrition, ProductsSelectedManager.getAll()); // <- photoUri пока пусто (не реализовано)!
