@@ -106,12 +106,12 @@ public class DishesAdapter extends RecyclerView.Adapter<DishesAdapter.DishViewHo
 
         public DishViewHolder(@NonNull View itemView) {
             super(itemView);
-            imageView = itemView.findViewById(R.id.imageView);
+            imageView = itemView.findViewById(R.id.imageViewDish);
             nameDish = itemView.findViewById(R.id.nameDish);
-            calories = itemView.findViewById(R.id.textViewCalories);
-            protein = itemView.findViewById(R.id.textViewProteins);
-            fat = itemView.findViewById(R.id.textViewFats);
-            carb = itemView.findViewById(R.id.textViewCarbs);
+            calories = itemView.findViewById(R.id.textViewCaloriesValue);
+            protein = itemView.findViewById(R.id.textViewProteinValue);
+            fat = itemView.findViewById(R.id.textViewFatValue);
+            carb = itemView.findViewById(R.id.textViewCarbValue);
         }
     }
 }
