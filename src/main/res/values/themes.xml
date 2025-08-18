@@ -13,4 +13,33 @@
     <style name="CustomProgressBar" parent="Widget.AppCompat.ProgressBar">
         <item name="android:indeterminateTint">?attr/colorOnBackground</item>
     </style>
+
+    <!-- Base Style for K/B/J/U Text Views -->
+    <style name="MacroBaseTextView">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_columnWeight">1</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <!-- Style for K/B/J/U Labels (К, Б, Ж, У) -->
+    <style name="MacroLabelTextView" parent="MacroBaseTextView">
+        <item name="android:textAppearance">?attr/textAppearanceLabelMedium</item>
+        <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
+    </style>
+
+    <!-- Style for K/B/J/U Values (e.g., 350, 20, 15, 40) -->
+    <style name="MacroValueTextView" parent="MacroBaseTextView">
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:textAppearance">?attr/textAppearanceBodyMedium</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
+
+    <!-- Style for Rounded ImageView -->
+    <style name="ShapeAppearance.App.RoundedImageView" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">15dp</item>
+    </style>
+
 </resources>

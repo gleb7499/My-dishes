@@ -1,4 +1,4 @@
-package com.mydishes.mydishes.utils;
+package com.mydishes.mydishes.Utils;
 
 import android.text.Editable;
 import android.text.TextWatcher;

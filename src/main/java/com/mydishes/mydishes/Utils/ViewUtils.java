@@ -1,8 +1,9 @@
-package com.mydishes.mydishes.utils;
+package com.mydishes.mydishes.Utils;
 
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -40,5 +41,14 @@ public class ViewUtils {
             v.setLayoutParams(params);
             return insets;
         });
+    }
+
+    // Преобразует строку в float, безопасно
+    public static float parseFloatSafe(@NonNull String text) {
+        try {
+            return (float) Double.parseDouble(text.replace(",", ".").replaceAll("[^\\d.]", ""));
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 }

@@ -59,7 +59,15 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="add_choosing_products_button">Кнопка для добавления выбранных продуктов</string>
-    <string name="add_button">Добавить</string>
+    <string name="add_button">Готово</string>
     <string name="inputName">Название</string>
     <string name="enter_name_new_dish">Введите название нового блюда</string>
+    <string name="dish_photo">Фото блюда</string>
+    <string name="calories">Ккал:</string>
+    <string name="protein">Белки:</string>
+    <string name="fat">Жиры:</string>
+    <string name="carb">Углеводы:</string>
+    <string name="action_edit">Изменить\n</string>
+    <string name="action_delete">Удалить</string>
+    <string name="ingredients">Ингредиенты</string>
 </resources>

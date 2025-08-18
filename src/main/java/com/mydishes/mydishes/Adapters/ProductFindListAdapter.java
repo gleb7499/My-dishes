@@ -1,6 +1,6 @@
 package com.mydishes.mydishes.Adapters;
 
-import static com.mydishes.mydishes.utils.NutritionCalculator.parseFloatSafe;
+import static com.mydishes.mydishes.Utils.ViewUtils.parseFloatSafe;
 
 import android.app.Activity;
 import android.content.Context;
@@ -27,9 +27,10 @@ import com.mydishes.mydishes.Parser.EdostavkaParser;
 import com.mydishes.mydishes.Parser.Parser;
 import com.mydishes.mydishes.Parser.ProductParseCallback;
 import com.mydishes.mydishes.R;
-import com.mydishes.mydishes.utils.TextWatcherUtils;
+import com.mydishes.mydishes.Utils.TextWatcherUtils;
 
 import java.util.List;
+import java.util.Objects;
 
 // Класс-адаптер для отображения найденных продуктов при парсинге продуктового сайта
 public class ProductFindListAdapter extends RecyclerView.Adapter<ProductFindListAdapter.ProductFindViewHolder> {
@@ -45,7 +46,14 @@ public class ProductFindListAdapter extends RecyclerView.Adapter<ProductFindList
 
     // Обновление списка с учетом предыдущего содержимого
     public void submitList(List<Product> newItems) {
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new ProductDiffCallback(products, newItems));
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(
+                new GenericDiffCallback<>(
+                        products,                         // старый список
+                        newItems,                             // новый список
+                        (oldProduct, newProduct) -> Objects.equals(oldProduct.getName(), newProduct.getName()), // сравнение ID
+                        Product::equals                           // сравнение содержимого
+                )
+        );
         products.clear();
         products.addAll(newItems);
         diffResult.dispatchUpdatesTo(this);
@@ -55,7 +63,7 @@ public class ProductFindListAdapter extends RecyclerView.Adapter<ProductFindList
     @NonNull
     @Override
     public ProductFindViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.recycler_view_find_products, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.list_item_product, parent, false);
         return new ProductFindViewHolder(view);
     }
 
@@ -138,6 +146,7 @@ public class ProductFindListAdapter extends RecyclerView.Adapter<ProductFindList
         });
     }
 
+    // Размер списка продуктов
     @Override
     public int getItemCount() {
         return products.size();
@@ -153,7 +162,7 @@ public class ProductFindListAdapter extends RecyclerView.Adapter<ProductFindList
         public ProductFindViewHolder(View view) {
             super(view);
             imageView = view.findViewById(R.id.imageView);
-            textView = view.findViewById(R.id.textViewName);
+            textView = view.findViewById(R.id.nameDish);
         }
     }
 }
