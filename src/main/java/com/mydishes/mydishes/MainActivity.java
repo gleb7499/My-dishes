@@ -8,12 +8,26 @@ import android.widget.LinearLayout;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.mydishes.mydishes.Adapters.DishesAdapter;
+import com.mydishes.mydishes.Models.DishesManager;
 import com.mydishes.mydishes.Utils.ViewUtils;
+
+import java.util.ArrayList;
 
 // Главное окно приложения (отображение списка созданных блюд)
 public class MainActivity extends AppCompatActivity {
+
+    private DishesAdapter adapter;
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        adapter.submitList(DishesManager.getAll());
+    }
+
     // Создание активити
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +40,10 @@ public class MainActivity extends AppCompatActivity {
 
         LinearLayout linearLayout = findViewById(R.id.linear_layout);
         RecyclerView recyclerView = findViewById(R.id.add_products_recycler);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        adapter = new DishesAdapter(this, new ArrayList<>());
+        recyclerView.setAdapter(adapter);
+
         ImageButton imageButton = findViewById(R.id.addButton);
 
         ViewUtils.applyInsets(linearLayout, true, false, false, false);
