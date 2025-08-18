@@ -1,6 +1,6 @@
 package com.mydishes.mydishes.Parser;
 
-import static com.mydishes.mydishes.utils.NutritionCalculator.parseFloatSafe;
+import static com.mydishes.mydishes.Utils.NutritionCalculator.parseFloatSafe;
 
 import androidx.annotation.NonNull;
 

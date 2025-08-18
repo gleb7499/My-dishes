@@ -10,7 +10,7 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.mydishes.mydishes.utils.ViewUtils;
+import com.mydishes.mydishes.Utils.ViewUtils;
 
 // Главное окно приложения (отображение списка созданных блюд)
 public class MainActivity extends AppCompatActivity {

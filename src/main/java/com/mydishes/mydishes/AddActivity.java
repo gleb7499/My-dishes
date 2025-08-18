@@ -1,6 +1,6 @@
 package com.mydishes.mydishes;
 
-import static com.mydishes.mydishes.utils.ViewUtils.applyInsets;
+import static com.mydishes.mydishes.Utils.ViewUtils.applyInsets;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -33,8 +33,8 @@ import com.mydishes.mydishes.Models.ProductsSelectedManager;
 import com.mydishes.mydishes.Parser.EdostavkaParser;
 import com.mydishes.mydishes.Parser.Parser;
 import com.mydishes.mydishes.Parser.ProductFindCallback;
-import com.mydishes.mydishes.utils.TextWatcherUtils;
-import com.mydishes.mydishes.utils.NutritionCalculator;
+import com.mydishes.mydishes.Utils.TextWatcherUtils;
+import com.mydishes.mydishes.Utils.NutritionCalculator;
 
 import java.util.ArrayList;
 import java.util.List;

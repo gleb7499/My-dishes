@@ -1,4 +1,4 @@
-package com.mydishes.mydishes.utils;
+package com.mydishes.mydishes.Utils;
 
 import android.view.View;
 import android.view.ViewGroup;

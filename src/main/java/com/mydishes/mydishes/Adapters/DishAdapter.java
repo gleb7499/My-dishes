@@ -32,7 +32,7 @@ public class DishAdapter extends RecyclerView.Adapter<DishAdapter.DishViewHolder
     // Обновление списка с учетом предыдущего содержимого
     public void submitList(List<Dish> newItems) {
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(
-                new com.mydishes.mydishes.Utils.GenericDiffCallback<Dish>(
+                new GenericDiffCallback<>(
                         dishes,                         // старый список
                         newItems,                       // новый список
                         (oldDish, newDish) -> Objects.equals(oldDish.getName(), newDish.getName()), // сравнение ID

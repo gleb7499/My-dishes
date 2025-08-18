@@ -64,7 +64,7 @@ public class ProductSelectedAdapter extends RecyclerView.Adapter<ProductSelected
     // Обновление списка с учетом предыдущего содержимого
     public void submitList(List<Product> newList) {
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(
-                new com.mydishes.mydishes.Utils.GenericDiffCallback<Product>(
+                new GenericDiffCallback<>(
                         currentList,                         // старый список
                         newList,                             // новый список
                         (oldProduct, newProduct) -> Objects.equals(oldProduct.getName(), newProduct.getName()), // сравнение ID

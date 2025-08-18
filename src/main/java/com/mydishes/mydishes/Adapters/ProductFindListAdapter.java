@@ -1,6 +1,6 @@
 package com.mydishes.mydishes.Adapters;
 
-import static com.mydishes.mydishes.utils.NutritionCalculator.parseFloatSafe;
+import static com.mydishes.mydishes.Utils.NutritionCalculator.parseFloatSafe;
 
 import android.app.Activity;
 import android.content.Context;
@@ -27,7 +27,7 @@ import com.mydishes.mydishes.Parser.EdostavkaParser;
 import com.mydishes.mydishes.Parser.Parser;
 import com.mydishes.mydishes.Parser.ProductParseCallback;
 import com.mydishes.mydishes.R;
-import com.mydishes.mydishes.utils.TextWatcherUtils;
+import com.mydishes.mydishes.Utils.TextWatcherUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -47,7 +47,7 @@ public class ProductFindListAdapter extends RecyclerView.Adapter<ProductFindList
     // Обновление списка с учетом предыдущего содержимого
     public void submitList(List<Product> newItems) {
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(
-                new com.mydishes.mydishes.Utils.GenericDiffCallback<Product>(
+                new GenericDiffCallback<>(
                         products,                         // старый список
                         newItems,                             // новый список
                         (oldProduct, newProduct) -> Objects.equals(oldProduct.getName(), newProduct.getName()), // сравнение ID

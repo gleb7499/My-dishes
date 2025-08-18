@@ -13,7 +13,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.mydishes.mydishes.Adapters.ProductSelectedAdapter;
 import com.mydishes.mydishes.Models.ProductsSelectedManager;
 import com.mydishes.mydishes.databinding.FragmentViewAddedBinding;
-import com.mydishes.mydishes.utils.ViewUtils;
+import com.mydishes.mydishes.Utils.ViewUtils;
 
 import java.util.ArrayList;
 

@@ -1,4 +1,4 @@
-package com.mydishes.mydishes.Utils;
+package com.mydishes.mydishes.Adapters;
 
 import androidx.recyclerview.widget.DiffUtil;
 
