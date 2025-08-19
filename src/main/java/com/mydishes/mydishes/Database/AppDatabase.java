@@ -17,7 +17,7 @@ import com.mydishes.mydishes.Database.model.Product;
 @Database(entities = {Dish.class, Nutrition.class, Product.class, DishProductCrossRef.class}, version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
-    private static final String dishesDatabaseName = "dishesDatabase";
+    private static final String dishesDatabaseName = "dishes_database";
     private static volatile AppDatabase INSTANCE;
 
     public static AppDatabase getDatabase(final Context context) {

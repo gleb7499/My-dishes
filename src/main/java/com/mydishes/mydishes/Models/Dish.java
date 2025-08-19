@@ -7,6 +7,7 @@ import java.util.Objects;
 
 // Класс-модель для блюда
 public class Dish {
+    private long id; // ID
     private String name; // Наименование
     private String photoUri; // Ссылка на фото
     private Nutrition nutrition; // Объект содержания КБЖУ
@@ -21,6 +22,14 @@ public class Dish {
 
     public Dish() {
         // Empty constructor!
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getName() {

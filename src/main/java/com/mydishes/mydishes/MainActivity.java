@@ -19,8 +19,8 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.mydishes.mydishes.Adapters.DishesAdapter;
 import com.mydishes.mydishes.Adapters.IngredientsAdapter;
+import com.mydishes.mydishes.Database.repository.DataRepository;
 import com.mydishes.mydishes.Models.Dish;
-import com.mydishes.mydishes.Models.DishesManager;
 import com.mydishes.mydishes.Models.Product;
 import com.mydishes.mydishes.Utils.ViewUtils;
 
@@ -31,18 +31,19 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private DishesAdapter adapter;
+    private DataRepository dataRepository;
 
     @Override
     protected void onResume() {
         super.onResume();
-        adapter.submitList(DishesManager.getAll());
+        loadDishesFromDb();
     }
 
-    // Создание активити
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // настройка активити
         super.onCreate(savedInstanceState);
+
+        // Настройка активити
         EdgeToEdge.enable(this);
         getWindow().setNavigationBarColor(android.graphics.Color.TRANSPARENT);
         getWindow().setStatusBarColor(android.graphics.Color.TRANSPARENT);
@@ -51,22 +52,24 @@ public class MainActivity extends AppCompatActivity {
         LinearLayout linearLayout = findViewById(R.id.linear_layout);
         RecyclerView recyclerView = findViewById(R.id.add_products_recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+
         adapter = new DishesAdapter(new DishesAdapter.OnDishActionClickListener() {
-            // В вашем Activity или Fragment, который реализует DishesAdapter.OnDishActionClickListener
             @Override
             public void onDishClick(Dish dish) {
                 if (dish == null) return;
 
                 BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(MainActivity.this);
-                View bottomSheetView = LayoutInflater.from(MainActivity.this).inflate(R.layout.bottom_sheet_dish_details,
-                        findViewById(R.id.bottom_sheet_dish_details_container), // Используйте ID корневого элемента из XML
-                        false);
+                View bottomSheetView = LayoutInflater.from(MainActivity.this).inflate(
+                        R.layout.bottom_sheet_dish_details,
+                        findViewById(R.id.bottom_sheet_dish_details_container),
+                        false
+                );
                 bottomSheetDialog.setContentView(bottomSheetView);
 
                 ImageView dishImage = bottomSheetView.findViewById(R.id.bottom_sheet_dish_image);
                 TextView dishName = bottomSheetView.findViewById(R.id.bottom_sheet_dish_name);
                 RecyclerView ingredientsRecyclerView = bottomSheetView.findViewById(R.id.bottom_sheet_ingredients_recycler_view);
-                TextView ingredientsTitleTextView = bottomSheetView.findViewById(R.id.bottom_sheet_ingredients_title); // Для скрытия/показа
+                TextView ingredientsTitleTextView = bottomSheetView.findViewById(R.id.bottom_sheet_ingredients_title);
 
                 dishName.setText(dish.getName());
 
@@ -102,14 +105,29 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("DishesAdapter", "Delete clicked for dish: " + dish.getName());
             }
         });
+
         recyclerView.setAdapter(adapter);
 
         ImageButton imageButton = findViewById(R.id.addButton);
-
         ViewUtils.applyInsets(linearLayout, true, false, false, false);
-
         imageButton.setOnClickListener(this::startAddActivity);
 
+        // --- Новый код для загрузки данных из базы ---
+        dataRepository = DataRepository.getInstance(getApplication());
+
+        loadDishesFromDb();
+
+    }
+
+    private void loadDishesFromDb() {
+        new Thread(() -> {
+            try {
+                List<Dish> dishes = dataRepository.getAllDishesWithDetails().get();
+                runOnUiThread(() -> adapter.submitList(dishes));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     private void startAddActivity(View v) {

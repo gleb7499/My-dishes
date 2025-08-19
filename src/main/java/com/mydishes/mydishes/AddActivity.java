@@ -25,6 +25,7 @@ import com.google.android.material.search.SearchView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 import com.mydishes.mydishes.Adapters.ProductFindListAdapter;
+import com.mydishes.mydishes.Database.repository.DataRepository;
 import com.mydishes.mydishes.Models.Dish;
 import com.mydishes.mydishes.Models.DishesManager;
 import com.mydishes.mydishes.Models.Nutrition;
@@ -61,14 +62,17 @@ public class AddActivity extends AppCompatActivity {
     private TextView textViewNothing; // отображение надписи о том, что ничего не найдено
     private RecyclerView addProductsRecycler; // отображение результата поиска (список продуктов)
     private ProductFindListAdapter productFindListAdapter; // адаптер для RecyclerView
-    FloatingActionButton productListButton; // отображение списка выбранных продуктов
+    private FloatingActionButton productListButton; // отображение списка выбранных продуктов
     private final Parser parser = new EdostavkaParser(); // объект класса парсера
+    private DataRepository dataRepository; // объект класса репозитория
 
 
     // создали активити
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         DishesManager.subscribe(printDishesList); // Временное отображение в логе!
+
+        dataRepository = DataRepository.getInstance(this.getApplication());
 
         // Настройка отображения
         super.onCreate(savedInstanceState);
@@ -167,6 +171,7 @@ public class AddActivity extends AppCompatActivity {
                     // Положили в менеджера блюд
                     DishesManager.add(dish);
 
+                    dataRepository.insertDishWithDetails(dish);
 
                     // Очистили менеджера продуктов для текущего блюда!
                     ProductsSelectedManager.clear();
