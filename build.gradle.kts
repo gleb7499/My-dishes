@@ -53,7 +53,10 @@ dependencies {
     implementation(libs.navigation.ui)
     implementation(libs.jsoup)
     implementation(libs.glide)
+    implementation(libs.room.common.jvm)
+    implementation(libs.room.runtime)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    annotationProcessor(libs.room.compiler)
 }

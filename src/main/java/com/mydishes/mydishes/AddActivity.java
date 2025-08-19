@@ -167,6 +167,7 @@ public class AddActivity extends AppCompatActivity {
                     // Положили в менеджера блюд
                     DishesManager.add(dish);
 
+
                     // Очистили менеджера продуктов для текущего блюда!
                     ProductsSelectedManager.clear();
 
