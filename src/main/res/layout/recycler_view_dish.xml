@@ -21,7 +21,7 @@
         android:padding="16dp">
 
         <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/imageViewDish"
+            android:id="@+id/dishImage"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -35,7 +35,7 @@
             tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
         <TextView
-            android:id="@+id/nameDish"
+            android:id="@+id/dishName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -44,7 +44,7 @@
             android:textSize="17sp"
             android:textAppearance="?attr/textAppearanceTitleMedium"
             android:textColor="?attr/colorOnSurface"
-            app:layout_constraintStart_toEndOf="@id/imageViewDish"
+            app:layout_constraintStart_toEndOf="@id/dishImage"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             tools:text="Название очень вкусного и аппетитного блюда в две строки" />
@@ -55,9 +55,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             app:layout_constraintBottom_toTopOf="@+id/macrosGridLayout"
-            app:layout_constraintEnd_toEndOf="@id/nameDish"
-            app:layout_constraintStart_toStartOf="@id/nameDish"
-            app:layout_constraintTop_toBottomOf="@id/nameDish"
+            app:layout_constraintEnd_toEndOf="@id/dishName"
+            app:layout_constraintStart_toStartOf="@id/dishName"
+            app:layout_constraintTop_toBottomOf="@id/dishName"
             app:layout_constraintVertical_bias="1.0" />
 
         <GridLayout
@@ -68,8 +68,8 @@
             android:columnCount="4"
             android:rowCount="2"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@id/nameDish"
-            app:layout_constraintStart_toStartOf="@id/nameDish"
+            app:layout_constraintEnd_toEndOf="@id/dishName"
+            app:layout_constraintStart_toStartOf="@id/dishName"
             app:layout_constraintTop_toBottomOf="@id/nameMacrosDivider"
             app:layout_constraintVertical_bias="1.0">
 

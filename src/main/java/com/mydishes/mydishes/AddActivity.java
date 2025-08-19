@@ -35,7 +35,6 @@ import com.mydishes.mydishes.Parser.Parser;
 import com.mydishes.mydishes.Parser.ProductFindCallback;
 import com.mydishes.mydishes.Utils.TextWatcherUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 // Класс экрана добавления блюда (поис продуктов, составления списка продуктов, создание блюда)
@@ -81,7 +80,7 @@ public class AddActivity extends AppCompatActivity {
         // настраиваем RecyclerView
         addProductsRecycler = findViewById(R.id.add_products_recycler);
         addProductsRecycler.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        productFindListAdapter = new ProductFindListAdapter(this, new ArrayList<>());
+        productFindListAdapter = new ProductFindListAdapter(this);
         addProductsRecycler.setAdapter(productFindListAdapter);
 
         // настраиваем поисковую строку, ProgressBar и textViewNothing

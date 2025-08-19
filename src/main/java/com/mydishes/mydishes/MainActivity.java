@@ -51,11 +51,11 @@ public class MainActivity extends AppCompatActivity {
         LinearLayout linearLayout = findViewById(R.id.linear_layout);
         RecyclerView recyclerView = findViewById(R.id.add_products_recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        adapter = new DishesAdapter(this, new ArrayList<>(), new DishesAdapter.OnDishActionClickListener() {
+        adapter = new DishesAdapter(new DishesAdapter.OnDishActionClickListener() {
             // В вашем Activity или Fragment, который реализует DishesAdapter.OnDishActionClickListener
             @Override
             public void onDishClick(Dish dish) {
-                if (dish == null) return; // Добавим проверку на null
+                if (dish == null) return;
 
                 BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(MainActivity.this);
                 View bottomSheetView = LayoutInflater.from(MainActivity.this).inflate(R.layout.bottom_sheet_dish_details,
@@ -64,11 +64,12 @@ public class MainActivity extends AppCompatActivity {
                 bottomSheetDialog.setContentView(bottomSheetView);
 
                 ImageView dishImage = bottomSheetView.findViewById(R.id.bottom_sheet_dish_image);
-                TextView dishNameTextView = bottomSheetView.findViewById(R.id.bottom_sheet_dish_name); // Изменено имя переменной
+                TextView dishName = bottomSheetView.findViewById(R.id.bottom_sheet_dish_name);
                 RecyclerView ingredientsRecyclerView = bottomSheetView.findViewById(R.id.bottom_sheet_ingredients_recycler_view);
                 TextView ingredientsTitleTextView = bottomSheetView.findViewById(R.id.bottom_sheet_ingredients_title); // Для скрытия/показа
 
-                dishNameTextView.setText(dish.getName());
+                dishName.setText(dish.getName());
+
                 Glide.with(MainActivity.this)
                         .load(dish.getPhotoUri())
                         .placeholder(R.drawable.placeholder)
@@ -79,9 +80,10 @@ public class MainActivity extends AppCompatActivity {
                 if (ingredients != null && !ingredients.isEmpty()) {
                     ingredientsTitleTextView.setVisibility(View.VISIBLE);
                     ingredientsRecyclerView.setVisibility(View.VISIBLE);
-                    IngredientsAdapter ingredientsAdapter = new IngredientsAdapter(MainActivity.this, ingredients);
+                    IngredientsAdapter ingredientsAdapter = new IngredientsAdapter();
                     ingredientsRecyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
                     ingredientsRecyclerView.setAdapter(ingredientsAdapter);
+                    ingredientsAdapter.submitList(new ArrayList<>(ingredients));
                 } else {
                     ingredientsTitleTextView.setVisibility(View.GONE);
                     ingredientsRecyclerView.setVisibility(View.GONE);

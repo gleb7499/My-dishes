@@ -24,7 +24,7 @@
         app:layout_constraintWidth_percent="0.25">
 
         <ImageView
-            android:id="@+id/imageView"
+            android:id="@+id/productImage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:contentDescription="@string/productsPhoto"
@@ -33,7 +33,7 @@
     </androidx.cardview.widget.CardView>
 
     <TextView
-        android:id="@+id/nameDish"
+        android:id="@+id/productName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="15dp"
@@ -42,13 +42,13 @@
         android:textColor="?attr/colorOnSurface"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/textViewMass"
+        app:layout_constraintEnd_toStartOf="@id/productMass"
         app:layout_constraintHorizontal_weight="0.6"
         app:layout_constraintStart_toEndOf="@id/imageCard"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textViewMass"
+        android:id="@+id/productMass"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="15dp"
@@ -61,7 +61,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_weight="0.25"
-        app:layout_constraintStart_toEndOf="@id/nameDish"
+        app:layout_constraintStart_toEndOf="@id/productName"
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.divider.MaterialDivider

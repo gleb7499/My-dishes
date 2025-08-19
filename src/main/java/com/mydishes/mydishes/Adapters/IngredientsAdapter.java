@@ -1,13 +1,11 @@
 package com.mydishes.mydishes.Adapters;
 
-import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -15,59 +13,65 @@ import com.mydishes.mydishes.Models.Product;
 import com.mydishes.mydishes.R;
 
 import java.text.DecimalFormat;
-import java.util.List;
+import java.util.Objects;
 
-public class IngredientsAdapter extends RecyclerView.Adapter<IngredientsAdapter.IngredientViewHolder> {
+public class IngredientsAdapter extends BaseAdapter<Product, IngredientsAdapter.IngredientsViewHolder> {
+    private static final DecimalFormat decimalFormat = new DecimalFormat("#.##");
 
-    private final Context context;
-    private final List<Product> ingredients;
-    private final DecimalFormat decimalFormat; // Для форматирования массы
-
-    public IngredientsAdapter(Context context, List<Product> ingredients) {
-        this.context = context;
-        this.ingredients = ingredients;
-        // Инициализируем DecimalFormat для отображения массы без лишних нулей
-        this.decimalFormat = new DecimalFormat("#.##"); // Отобразит до 2 знаков после запятой, если они есть
-        this.decimalFormat.setRoundingMode(java.math.RoundingMode.HALF_UP);
-    }
-
-    @NonNull
-    @Override
-    public IngredientViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.list_item_product, parent, false);
-        return new IngredientViewHolder(view);
+    public IngredientsAdapter() {
+        super(new ProductDiffCallback());
     }
 
     @Override
-    public void onBindViewHolder(@NonNull IngredientViewHolder holder, int position) {
-        Product ingredient = ingredients.get(position);
-        holder.ingredientName.setText(ingredient.getName());
-        // Форматируем массу, чтобы убрать лишние нули, например, 100.0 -> 100, 100.50 -> 100.5
-        String massString = decimalFormat.format(ingredient.getMass()) + " г";
-        holder.ingredientQuantity.setText(massString);
-
-        Glide.with(context)
-                .load(ingredient.getImageURL()) // Предполагается, что Product.getImageURL() возвращает URL изображения
-                .placeholder(R.drawable.placeholder) // Опционально: изображение-заполнитель
-                .error(R.drawable.error_image) // Опционально: изображение при ошибке загрузки
-                .into(holder.ingredientImage);
+    protected int getLayoutId(int viewType) {
+        return R.layout.list_item_product; // Используем ID макета для каждого элемента
     }
 
     @Override
-    public int getItemCount() {
-        return ingredients == null ? 0 : ingredients.size();
+    protected IngredientsViewHolder createViewHolder(@NonNull View itemView, int viewType) {
+        return new IngredientsViewHolder(itemView);
     }
 
-    public static class IngredientViewHolder extends RecyclerView.ViewHolder {
-        ImageView ingredientImage;
-        TextView ingredientName;
-        TextView ingredientQuantity;
+    @Override
+    protected void bind(@NonNull IngredientsViewHolder holder, @NonNull Product product) {
+        holder.bind(product);
+    }
 
-        public IngredientViewHolder(@NonNull View itemView) {
-            super(itemView);
-            ingredientImage = itemView.findViewById(R.id.imageView); // Updated ID
-            ingredientName = itemView.findViewById(R.id.nameDish); // Updated ID
-            ingredientQuantity = itemView.findViewById(R.id.textViewMass); // Updated ID
+    public static class IngredientsViewHolder extends RecyclerView.ViewHolder {
+        private final ImageView productImage;
+        private final TextView productName;
+        private final TextView productMass;
+
+        public IngredientsViewHolder(@NonNull View view) {
+            super(view);
+            productImage = view.findViewById(R.id.productImage);
+            productName = view.findViewById(R.id.productName);
+            productMass = view.findViewById(R.id.productMass);
+        }
+
+        public void bind(@NonNull final Product product) {
+            productName.setText(product.getName());
+
+            String massText = decimalFormat.format(product.getMass()) + " г";
+            productMass.setText(massText);
+
+            Glide.with(itemView.getContext())
+                    .load(product.getImageURL())
+                    .placeholder(R.drawable.placeholder)
+                    .error(R.drawable.error_image)
+                    .into(productImage);
+        }
+    }
+
+    private static class ProductDiffCallback extends DiffUtil.ItemCallback<Product> {
+        @Override
+        public boolean areItemsTheSame(@NonNull Product oldItem, @NonNull Product newItem) {
+            return Objects.equals(oldItem.getName(), newItem.getName());
+        }
+
+        @Override
+        public boolean areContentsTheSame(@NonNull Product oldItem, @NonNull Product newItem) {
+            return oldItem.equals(newItem);
         }
     }
 }

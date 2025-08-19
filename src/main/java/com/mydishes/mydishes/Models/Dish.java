@@ -57,8 +57,7 @@ public class Dish {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Dish)) return false;
-        Dish dish = (Dish) o;
+        if (!(o instanceof Dish dish)) return false;
         return Objects.equals(name, dish.name) && Objects.equals(photoUri, dish.photoUri) && Objects.equals(nutrition, dish.nutrition) && Objects.equals(products, dish.products);
     }
 
