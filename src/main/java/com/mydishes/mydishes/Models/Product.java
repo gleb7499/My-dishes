@@ -66,8 +66,7 @@ public class Product {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Product)) return false;
-        Product product = (Product) o;
+        if (!(o instanceof Product product)) return false;
         return Float.compare(mass, product.mass) == 0 && Objects.equals(productURL, product.productURL) && Objects.equals(imageURL, product.imageURL) && Objects.equals(name, product.name) && Objects.equals(nutrition, product.nutrition);
     }
 
