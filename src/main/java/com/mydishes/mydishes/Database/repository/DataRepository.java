@@ -19,6 +19,7 @@ import com.mydishes.mydishes.Database.model.relations.ProductWithNutrition;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -268,47 +269,76 @@ public class DataRepository {
     public void getAllDishesWithDetails(Activity activity, QueryCallBack<List<com.mydishes.mydishes.Models.Dish>> queryCallBack) {
         new Thread(() -> {
             try {
-                List<com.mydishes.mydishes.Models.Dish> dishes = executorService.submit(() -> {
-                    List<DishWithProductsAndNutrition> allDbDishDetails = dishDao.getAllDishesWithProductsAndNutrition();
-                    List<com.mydishes.mydishes.Models.Dish> resultAppDishes = new ArrayList<>();
-
-                    for (DishWithProductsAndNutrition dishDetails : allDbDishDetails) {
-                        com.mydishes.mydishes.Models.Dish resultDish = new com.mydishes.mydishes.Models.Dish();
-                        resultDish.setName(dishDetails.dish.name);
-                        resultDish.setPhotoUri(dishDetails.dish.photoUri);
-
-                        if (dishDetails.dishNutrition != null) {
-                            com.mydishes.mydishes.Models.Nutrition mainNutrition = new com.mydishes.mydishes.Models.Nutrition();
-                            mainNutrition.setCalories(dishDetails.dishNutrition.calories);
-                            mainNutrition.setProtein(dishDetails.dishNutrition.protein);
-                            mainNutrition.setFat(dishDetails.dishNutrition.fat);
-                            mainNutrition.setCarb(dishDetails.dishNutrition.carb);
-                            resultDish.setNutrition(mainNutrition);
-                        }
-
-                        if (dishDetails.products != null && !dishDetails.products.isEmpty()) {
-                            List<com.mydishes.mydishes.Models.Product> resultProducts = new ArrayList<>();
-                            List<Long> productIds = dishDetails.products.stream().map(p -> p.id).collect(Collectors.toList());
-                            List<ProductWithNutrition> productsWithNutrition = productDao.getProductsWithNutritionByIds(productIds);
-
-                            Map<Long, ProductWithNutrition> productMap = productsWithNutrition.stream()
-                                    .collect(Collectors.toMap(pwn -> pwn.product.id, pwn -> pwn));
-
-                            for (Product dbProduct : dishDetails.products) {
-                                ProductWithNutrition pwn = productMap.get(dbProduct.id);
-                                if (pwn != null) {
-                                    com.mydishes.mydishes.Models.Product appProduct = getProduct(pwn);
-                                    resultProducts.add(appProduct);
-                                }
-                            }
-                            resultDish.setProducts(resultProducts);
-                        }
-                        resultAppDishes.add(resultDish);
-                    }
-                    return resultAppDishes;
-                }).get();
-
+                List<com.mydishes.mydishes.Models.Dish> dishes = getAllDishesWithDetails();
                 activity.runOnUiThread(() -> queryCallBack.onSuccess(dishes));
+            } catch (Exception e) {
+                activity.runOnUiThread(() -> queryCallBack.onError(e));
+            }
+        }).start();
+    }
+
+    private List<com.mydishes.mydishes.Models.Dish> getAllDishesWithDetails() throws ExecutionException, InterruptedException {
+        return executorService.submit(() -> {
+            List<DishWithProductsAndNutrition> allDbDishDetails = dishDao.getAllDishesWithProductsAndNutrition();
+            List<com.mydishes.mydishes.Models.Dish> resultAppDishes = new ArrayList<>();
+
+            for (DishWithProductsAndNutrition dishDetails : allDbDishDetails) {
+                com.mydishes.mydishes.Models.Dish resultDish = new com.mydishes.mydishes.Models.Dish();
+                resultDish.setId(dishDetails.dish.id);
+                resultDish.setName(dishDetails.dish.name);
+                resultDish.setPhotoUri(dishDetails.dish.photoUri);
+
+                if (dishDetails.dishNutrition != null) {
+                    com.mydishes.mydishes.Models.Nutrition mainNutrition = new com.mydishes.mydishes.Models.Nutrition();
+                    mainNutrition.setCalories(dishDetails.dishNutrition.calories);
+                    mainNutrition.setProtein(dishDetails.dishNutrition.protein);
+                    mainNutrition.setFat(dishDetails.dishNutrition.fat);
+                    mainNutrition.setCarb(dishDetails.dishNutrition.carb);
+                    resultDish.setNutrition(mainNutrition);
+                }
+
+                if (dishDetails.products != null && !dishDetails.products.isEmpty()) {
+                    List<com.mydishes.mydishes.Models.Product> resultProducts = new ArrayList<>();
+                    List<Long> productIds = dishDetails.products.stream().map(p -> p.id).collect(Collectors.toList());
+                    List<ProductWithNutrition> productsWithNutrition = productDao.getProductsWithNutritionByIds(productIds);
+
+                    Map<Long, ProductWithNutrition> productMap = productsWithNutrition.stream()
+                            .collect(Collectors.toMap(pwn -> pwn.product.id, pwn -> pwn));
+
+                    for (Product dbProduct : dishDetails.products) {
+                        ProductWithNutrition pwn = productMap.get(dbProduct.id);
+                        if (pwn != null) {
+                            com.mydishes.mydishes.Models.Product appProduct = getProduct(pwn);
+                            resultProducts.add(appProduct);
+                        }
+                    }
+                    resultDish.setProducts(resultProducts);
+                }
+                resultAppDishes.add(resultDish);
+            }
+            return resultAppDishes;
+        }).get();
+    }
+
+    /**
+     * Deletes a dish by its ID.
+     * This operation is performed asynchronously.
+     * Due to CASCADE delete rules in the database schema, this will also remove:
+     * - The Nutrition entry associated with this Dish.
+     * - All DishProductCrossRef entries linking this Dish to Products.
+     * Product entities themselves will NOT be deleted.
+     *
+     * @param activity      The activity context for UI thread operations (e.g., callbacks).
+     * @param dishId        The ID of the dish to delete.
+     * @param queryCallBack Callback to be invoked on success or error.
+     *                      OnSuccess will be called with null (Void).
+     *                      OnError will be called with the encountered exception.
+     */
+    public void deleteDishById(Activity activity, long dishId, QueryCallBack<Void> queryCallBack) {
+        new Thread(() -> {
+            try {
+                dishDao.deleteDishById(dishId);
+                activity.runOnUiThread(() -> queryCallBack.onSuccess(null));
             } catch (Exception e) {
                 activity.runOnUiThread(() -> queryCallBack.onError(e));
             }

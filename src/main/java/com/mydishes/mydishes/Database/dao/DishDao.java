@@ -34,4 +34,7 @@ public interface DishDao {
     // Получить все Dish (без вложенных данных, если нужно только список названий, например)
     @Query("SELECT * FROM dishes")
     List<Dish> getAllDishesSimple();
+
+    @Query("DELETE FROM dishes WHERE id = :dishId")
+    int deleteDishById(long dishId);
 }

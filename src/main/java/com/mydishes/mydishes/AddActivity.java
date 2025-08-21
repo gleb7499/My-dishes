@@ -125,7 +125,7 @@ public class AddActivity extends AppCompatActivity {
                4) Добавить объект Dish в централизованный менеджер
             */
             bottomSheet.setOnConfirmListener(() -> {
-                // надутие и настройка XML
+                // надутие и настройка XML для ввода имени блюда
                 View dialogViewName = LayoutInflater.from(this).inflate(R.layout.dialog_input_name, null);
                 TextInputLayout inputFieldName = dialogViewName.findViewById(R.id.inputName);
                 EditText editTextName = inputFieldName.getEditText();

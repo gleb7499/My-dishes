@@ -5,7 +5,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -46,45 +45,11 @@ public class DishesAdapter extends BaseAdapter<Dish, DishesAdapter.DishViewHolde
                 onDishActionClickListener.onDishClick(item);
             }
         });
-
-        // Set long click listener for popup menu
-        holder.itemView.setOnLongClickListener(v -> {
-            if (onDishActionClickListener != null) {
-                showPopupMenu(holder.itemView, item); // Call showPopupMenu
-            }
-            return true; // Consume the long click
-        });
     }
 
-    // Method to show PopupMenu
-    private void showPopupMenu(View view, Dish dish) {
-        // Context is obtained from the view passed as an argument
-        PopupMenu popup = new PopupMenu(view.getContext(), view);
-        popup.getMenuInflater().inflate(R.menu.dish_context_menu, popup.getMenu());
-        popup.setOnMenuItemClickListener(menuItem -> {
-            int itemId = menuItem.getItemId();
-            if (itemId == R.id.action_edit_dish) {
-                if (onDishActionClickListener != null) {
-                    onDishActionClickListener.onEditClick(dish);
-                }
-                return true;
-            } else if (itemId == R.id.action_delete_dish) {
-                if (onDishActionClickListener != null) {
-                    onDishActionClickListener.onDeleteClick(dish);
-                }
-                return true;
-            }
-            return false;
-        });
-        popup.show();
-    }
-
+    @FunctionalInterface
     public interface OnDishActionClickListener {
         void onDishClick(Dish dish);
-
-        void onEditClick(Dish dish);
-
-        void onDeleteClick(Dish dish);
     }
 
     // ViewHolder remains largely the same, but takes DecimalFormat and uses it
@@ -135,7 +100,7 @@ public class DishesAdapter extends BaseAdapter<Dish, DishesAdapter.DishViewHolde
     private static class DishDiffCallback extends DiffUtil.ItemCallback<Dish> {
         @Override
         public boolean areItemsTheSame(@NonNull Dish oldItem, @NonNull Dish newItem) {
-            return Objects.equals(oldItem.getName(), newItem.getName());
+            return Objects.equals(oldItem.getId(), newItem.getId());
         }
 
         @Override

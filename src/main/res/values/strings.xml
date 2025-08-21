@@ -71,4 +71,8 @@
     <string name="action_delete">Удалить</string>
     <string name="ingredients">Ингредиенты</string>
     <string name="enter_products_name">Введите имя продукта</string>
+    <string name="delete">Вы действительно хотите безвозвратно удалить блюдо?</string>
+    <string name="error_deleting_dish">Ошибка удаления блюда!</string>
+    <string name="delete_dish_confirmation">\'%1$s\'</string>
+    <string name="error_loading_dishes">Ошибка добавления блюда в БД!</string>
 </resources>
