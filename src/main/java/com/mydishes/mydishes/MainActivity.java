@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.snackbar.Snackbar;
 import com.mydishes.mydishes.Adapters.DishesAdapter;
 import com.mydishes.mydishes.Adapters.IngredientsAdapter;
 import com.mydishes.mydishes.Database.repository.DataRepository;
@@ -120,14 +121,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadDishesFromDb() {
-        new Thread(() -> {
-            try {
-                List<Dish> dishes = dataRepository.getAllDishesWithDetails().get();
-                runOnUiThread(() -> adapter.submitList(dishes));
-            } catch (Exception e) {
-                e.printStackTrace();
+        dataRepository.getAllDishesWithDetails(this, new DataRepository.QueryCallBack<>() {
+            @Override
+            public void onSuccess(List<Dish> result) {
+                adapter.submitList(result);
             }
-        }).start();
+
+            @Override
+            public void onError(Exception e) {
+                Snackbar.make(findViewById(android.R.id.content), "Ошибка! " + e, Snackbar.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void startAddActivity(View v) {

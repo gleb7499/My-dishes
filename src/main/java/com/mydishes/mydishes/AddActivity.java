@@ -5,7 +5,6 @@ import static com.mydishes.mydishes.Utils.ViewUtils.applyInsets;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -27,7 +26,6 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.mydishes.mydishes.Adapters.ProductFindListAdapter;
 import com.mydishes.mydishes.Database.repository.DataRepository;
 import com.mydishes.mydishes.Models.Dish;
-import com.mydishes.mydishes.Models.DishesManager;
 import com.mydishes.mydishes.Models.Nutrition;
 import com.mydishes.mydishes.Models.Product;
 import com.mydishes.mydishes.Models.ProductsSelectedManager;
@@ -49,12 +47,7 @@ public class AddActivity extends AppCompatActivity {
         if (searchRunnable != null) {
             handler.removeCallbacks(searchRunnable);
         }
-        // Временное отображение в логе!
-        DishesManager.removeSubscribe(printDishesList);
     }
-
-    // Временное отображение в логе!
-    private final DishesManager.Action printDishesList = () -> Log.d("My Dishes", DishesManager.dishes.toString());
 
     private final Handler handler = new Handler(); // выполнение отложенного запроса к сайту
     private Runnable searchRunnable; // инструкции отложенного запроса к сайту
@@ -70,10 +63,6 @@ public class AddActivity extends AppCompatActivity {
     // создали активити
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        DishesManager.subscribe(printDishesList); // Временное отображение в логе!
-
-        dataRepository = DataRepository.getInstance(this.getApplication());
-
         // Настройка отображения
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
@@ -94,6 +83,9 @@ public class AddActivity extends AppCompatActivity {
         applyInsets(findViewById(R.id.searchLayout), true, false, false, false);
         progressBar = findViewById(R.id.progressBar);
         textViewNothing = findViewById(R.id.textViewNothing);
+
+        // получаем объект для управления БД
+        dataRepository = DataRepository.getInstance(this.getApplication());
 
         // установка слушателя на изменение текста в строке поиска
         TextWatcherUtils.addSimpleTextWatcher(searchView.getEditText(), s -> {
@@ -139,52 +131,60 @@ public class AddActivity extends AppCompatActivity {
                 EditText editTextName = inputFieldName.getEditText();
                 if (editTextName == null) return;
 
-                // Отключаем отображение старых ошибок
-                TextWatcherUtils.addSimpleTextWatcher(editTextName, s -> editTextName.setError(null));
-
                 // Диалог для ввода наименования блюда
                 AlertDialog dialog = new MaterialAlertDialogBuilder(this)
-                        .setTitle(R.string.enter_products_mass)
+                        .setTitle(R.string.enter_products_name)
                         .setView(dialogViewName)
                         .setPositiveButton(R.string.ok, null) // временно null! (см. -> .setOnShowListener)
                         .setNegativeButton(R.string.cancel, (d, w) -> d.dismiss())
                         .create();
 
+                // Отключаем отображение старых ошибок
+                TextWatcherUtils.addSimpleTextWatcher(editTextName, s -> {
+                    if (inputFieldName.getError() != null) inputFieldName.setError(null);
+                });
+
                 // Обработка введенного значения
                 dialog.setOnShowListener(d -> dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(v1 -> {
+                    // Обработка введенного значения
                     String dishName = editTextName.getText().toString().trim();
 
-                    // Проверка корректности имени
+                    // Обработка граничных случаев
                     if (dishName.isEmpty() || dishName.length() > 50) {
                         inputFieldName.setError(getString(R.string.error_value));
                         return;
                     }
-                    inputFieldName.setError(null);
 
-                    // Обработка введенного значения
                     // Получили итоговые значения КБЖУ для блюда
                     Nutrition nutrition = Nutrition.calculate(ProductsSelectedManager.getAll());
 
                     // Создали блюдо
                     Dish dish = new Dish(dishName, "", nutrition, ProductsSelectedManager.getAll()); // <- photoUri пока пусто (не реализовано)!
 
-                    // Положили в менеджера блюд
-                    DishesManager.add(dish);
+                    dataRepository.insertDishWithDetails(AddActivity.this, dish, new DataRepository.QueryCallBack<>() {
+                        @Override
+                        public void onSuccess(Long result) {
+                            dish.setId(result);
+                            // Вышли в родительское активити
+                            dialog.dismiss();
+                            bottomSheet.dismiss();
+                            AddActivity.this.finish();
+                        }
 
-                    dataRepository.insertDishWithDetails(dish);
-
-                    // Очистили менеджера продуктов для текущего блюда!
-                    ProductsSelectedManager.clear();
-
-                    // Вышли в родительское активити
-                    this.finish();
+                        @Override
+                        public void onError(Exception e) {
+                            dialog.dismiss(); // Закрываем диалог в случае ошибки
+                            bottomSheet.dismiss();
+                            Snackbar.make(findViewById(android.R.id.content), "Ошибка! " + e, Snackbar.LENGTH_LONG).show();
+                        }
+                    });
                 }));
 
-                // завершаем диалог
+                // показываем диалог
                 dialog.show();
             });
 
-            // показываем диалог
+            // показываем нижний лист со списком добавленных блюд
             bottomSheet.show(getSupportFragmentManager(), bottomSheet.getTag());
         });
 
