@@ -64,14 +64,19 @@ public class ProductFindListAdapter extends BaseAdapter<Product, ProductFindList
 
         // Создаем диалог с вводом массы и обрабатываем его логику
         holder.itemView.setOnClickListener(v -> {
+            // раздуваем макет
             View dialogViewMass = LayoutInflater.from(context).inflate(R.layout.dialog_input_mass, null);
             TextInputLayout inputFieldMass = dialogViewMass.findViewById(R.id.inputMass);
             EditText editTextMass = inputFieldMass.getEditText();
 
             if (editTextMass == null) return;
 
-            TextWatcherUtils.addSimpleTextWatcher(editTextMass, s -> inputFieldMass.setError(null));
+            // Отключаем отображение старых ошибок
+            TextWatcherUtils.addSimpleTextWatcher(editTextMass, s -> {
+                if (inputFieldMass.getError() != null) inputFieldMass.setError(null);
+            });
 
+            // создаем диалог для ввода массы выбранного продукта
             AlertDialog dialog = new MaterialAlertDialogBuilder(context)
                     .setTitle(R.string.enter_products_mass)
                     .setMessage(product.getName())
@@ -80,31 +85,33 @@ public class ProductFindListAdapter extends BaseAdapter<Product, ProductFindList
                     .setNegativeButton(R.string.cancel, (d, w) -> d.dismiss())
                     .create();
 
+            // Обработка введенного значения
             dialog.setOnShowListener(d -> {
                 Button okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
                 okButton.setOnClickListener(v1 -> {
                     String mass = editTextMass.getText().toString().trim();
+
                     if (mass.isEmpty() || mass.length() > 7) {
                         inputFieldMass.setError(context.getString(R.string.error_value));
-                    } else {
-                        inputFieldMass.setError(null);
-                        parser.parseProductDetailsAsync((Activity) context, product, new ProductParseCallback() {
-                            @Override
-                            public void onSuccess(Product parsedProduct) {
-                                // Важно: используем объект parsedProduct, который содержит детали КБЖУ
-                                // и устанавливаем ему массу, которую ввел пользователь
-                                parsedProduct.setMass(parseFloatSafe(mass));
-                                ProductsSelectedManager.add(parsedProduct);
-                                Snackbar.make(holder.itemView, "Записан " + parsedProduct.getName(), Snackbar.LENGTH_LONG).show();
-                            }
-
-                            @Override
-                            public void onError(Exception e) {
-                                Snackbar.make(holder.itemView, "Ошибка парсинга: " + e.getMessage(), Snackbar.LENGTH_LONG).show();
-                            }
-                        });
-                        dialog.dismiss();
+                        return;
                     }
+
+                    // Получаем КБЖУ продукта с сайта
+                    parser.parseProductDetailsAsync((Activity) context, product, new ProductParseCallback() {
+                        @Override
+                        public void onSuccess(Product parsedProduct) {
+                            // Важно: используем объект parsedProduct, который содержит детали КБЖУ и устанавливаем ему массу, которую ввел пользователь
+                            parsedProduct.setMass(parseFloatSafe(mass));
+                            ProductsSelectedManager.add(parsedProduct);
+                            Snackbar.make(holder.itemView, "Записан " + parsedProduct.getName(), Snackbar.LENGTH_LONG).show();
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            Snackbar.make(holder.itemView, "Ошибка парсинга: " + e.getMessage(), Snackbar.LENGTH_LONG).show();
+                        }
+                    });
+                    dialog.dismiss();
                 });
             });
             dialog.show();

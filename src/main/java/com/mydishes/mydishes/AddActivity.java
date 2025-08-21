@@ -139,7 +139,7 @@ public class AddActivity extends AppCompatActivity {
                         .setNegativeButton(R.string.cancel, (d, w) -> d.dismiss())
                         .create();
 
-                // Отключаем отображение старых ошибок
+                // Отключаем отображение старых ошибок при вводе имени
                 TextWatcherUtils.addSimpleTextWatcher(editTextName, s -> {
                     if (inputFieldName.getError() != null) inputFieldName.setError(null);
                 });
@@ -163,8 +163,9 @@ public class AddActivity extends AppCompatActivity {
 
                     dataRepository.insertDishWithDetails(AddActivity.this, dish, new DataRepository.QueryCallBack<>() {
                         @Override
-                        public void onSuccess(Long result) {
+                        public void onSuccess(Long result) { // возврат - ID блюда в БД
                             dish.setId(result);
+                            ProductsSelectedManager.clear(); // очистили список
                             // Вышли в родительское активити
                             dialog.dismiss();
                             bottomSheet.dismiss();

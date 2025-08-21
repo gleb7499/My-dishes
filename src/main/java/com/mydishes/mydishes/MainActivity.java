@@ -109,15 +109,12 @@ public class MainActivity extends AppCompatActivity {
 
         recyclerView.setAdapter(adapter);
 
-        ImageButton imageButton = findViewById(R.id.addButton);
+        ImageButton addButton = findViewById(R.id.addButton);
         ViewUtils.applyInsets(linearLayout, true, false, false, false);
-        imageButton.setOnClickListener(this::startAddActivity);
+        addButton.setOnClickListener(this::startAddActivity);
 
-        // --- Новый код для загрузки данных из базы ---
+        // объект для работы с БД
         dataRepository = DataRepository.getInstance(getApplication());
-
-        loadDishesFromDb();
-
     }
 
     private void loadDishesFromDb() {
