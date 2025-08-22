@@ -75,4 +75,7 @@
     <string name="error_deleting_dish">Ошибка удаления блюда!</string>
     <string name="delete_dish_confirmation">\'%1$s\'</string>
     <string name="error_loading_dishes">Ошибка добавления блюда в БД!</string>
+    <string name="error_update_name_dish">Ошибка обновления названия блюда!</string>
+    <string name="no_products_selected">Ни один продукт не выбран!</string>
+    <string name="error_parser_text">Ошибка запроса!</string>
 </resources>

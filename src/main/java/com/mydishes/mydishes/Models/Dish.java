@@ -67,19 +67,20 @@ public class Dish {
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Dish dish)) return false;
-        return Objects.equals(name, dish.name) && Objects.equals(photoUri, dish.photoUri) && Objects.equals(nutrition, dish.nutrition) && Objects.equals(products, dish.products);
+        return id == dish.id && Objects.equals(name, dish.name) && Objects.equals(photoUri, dish.photoUri) && Objects.equals(nutrition, dish.nutrition) && Objects.equals(products, dish.products);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, photoUri, nutrition, products);
+        return Objects.hash(id, name, photoUri, nutrition, products);
     }
 
     @NonNull
     @Override
     public String toString() {
         return "Dish{" +
-                "name='" + name + '\'' +
+                "id=" + id +
+                ", name='" + name + '\'' +
                 ", photoUri='" + photoUri + '\'' +
                 ", nutrition=" + nutrition +
                 ", products=" + products +

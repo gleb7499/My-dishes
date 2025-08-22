@@ -5,6 +5,7 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Transaction;
+import androidx.room.Update;
 
 import com.mydishes.mydishes.Database.model.Dish;
 import com.mydishes.mydishes.Database.model.DishProductCrossRef;
@@ -37,4 +38,7 @@ public interface DishDao {
 
     @Query("DELETE FROM dishes WHERE id = :dishId")
     int deleteDishById(long dishId);
+
+    @Update
+    void updateDish(Dish dish);
 }

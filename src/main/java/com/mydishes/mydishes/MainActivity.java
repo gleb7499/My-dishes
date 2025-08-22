@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -26,6 +27,7 @@ import com.mydishes.mydishes.Adapters.IngredientsAdapter;
 import com.mydishes.mydishes.Database.repository.DataRepository;
 import com.mydishes.mydishes.Models.Dish;
 import com.mydishes.mydishes.Models.Product;
+import com.mydishes.mydishes.Utils.DialogUtils;
 import com.mydishes.mydishes.Utils.ViewUtils;
 
 import java.util.ArrayList;
@@ -36,7 +38,6 @@ public class MainActivity extends AppCompatActivity {
 
     private DishesAdapter adapter;
     private DataRepository dataRepository;
-    private RecyclerView recyclerView; // Сделаем recyclerView полем класса для доступа из onSwiped
 
     @Override
     protected void onResume() {
@@ -55,13 +56,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         LinearLayout linearLayout = findViewById(R.id.linear_layout);
-        recyclerView = findViewById(R.id.add_products_recycler); // Присваиваем полю класса
+        RecyclerView recyclerView = findViewById(R.id.add_products_recycler); // Присваиваем полю класса
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 
         // обработка нажатия на элемент списка
         adapter = new DishesAdapter(dish -> {
             if (dish == null) return;
 
+            // нижний лист для отображения информации о блюде (фото, наименование, список ингредиентов)
             BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(MainActivity.this);
             View bottomSheetView = LayoutInflater.from(MainActivity.this).inflate(
                     R.layout.bottom_sheet_dish_details,
@@ -69,20 +71,51 @@ public class MainActivity extends AppCompatActivity {
                     false
             );
             bottomSheetDialog.setContentView(bottomSheetView);
+            // Устанавливаем режим обработки появления клавиатуры
+            if (bottomSheetDialog.getWindow() != null) {
+                bottomSheetDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
+            }
 
+            // Добавляем слушатель закрытия диалога
+            bottomSheetDialog.setOnDismissListener(dialogInterface -> loadDishesFromDb());
+
+            // элементы нижнего листа
             ImageView dishImage = bottomSheetView.findViewById(R.id.bottom_sheet_dish_image);
             TextView dishNameTextView = bottomSheetView.findViewById(R.id.bottom_sheet_dish_name); // Изменено имя переменной во избежание конфликта
             RecyclerView ingredientsRecyclerView = bottomSheetView.findViewById(R.id.bottom_sheet_ingredients_recycler_view);
             TextView ingredientsTitleTextView = bottomSheetView.findViewById(R.id.bottom_sheet_ingredients_title);
 
+            // устанавливаем название блюда
             dishNameTextView.setText(dish.getName());
 
+            // обработка нажатия на название блюда
+            dishNameTextView.setOnClickListener(v -> DialogUtils.showEditDishNameDialog(MainActivity.this, dish.getName(), newName -> {
+                // Обновляем имя в объекте Dish
+                dish.setName(newName);
+
+                // Вызываем метод репозитория для обновления блюда в БД
+                dataRepository.updateDish(MainActivity.this, dish, new DataRepository.QueryCallBack<>() {
+                    @Override
+                    public void onSuccess(Void result) {
+                        // Обновляем текст в TextView
+                        dishNameTextView.setText(newName);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        Snackbar.make(bottomSheetView, getString(R.string.error_update_name_dish) + ": " + e.getMessage(), Snackbar.LENGTH_LONG).show();
+                    }
+                });
+            }));
+
+            // устанавливаем фото блюда
             Glide.with(MainActivity.this)
                     .load(dish.getPhotoUri())
                     .placeholder(R.drawable.placeholder)
                     .error(R.drawable.error_image)
                     .into(dishImage);
 
+            // устанавливаем список продуктов (ингредиентов) в recycler view
             List<Product> ingredients = dish.getProducts();
             if (ingredients != null && !ingredients.isEmpty()) {
                 ingredientsTitleTextView.setVisibility(View.VISIBLE);
@@ -155,10 +188,11 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        // привязываем свайп к RecyclerView один раз здесь
+        // привязываем свайп к RecyclerView
         return new ItemTouchHelper(simpleCallback);
     }
 
+    // загрузка всей информации о всех блюдах из БД
     private void loadDishesFromDb() {
         dataRepository.getAllDishesWithDetails(this, new DataRepository.QueryCallBack<>() {
             @Override

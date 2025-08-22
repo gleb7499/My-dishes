@@ -2,6 +2,7 @@ package com.mydishes.mydishes.Database.repository;
 
 import android.app.Activity;
 import android.app.Application;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -337,7 +338,46 @@ public class DataRepository {
     public void deleteDishById(Activity activity, long dishId, QueryCallBack<Void> queryCallBack) {
         new Thread(() -> {
             try {
-                dishDao.deleteDishById(dishId);
+                Log.d(TAG, "Attempting to delete dish with ID: " + dishId);
+                int deletedRows = dishDao.deleteDishById(dishId);
+                Log.d(TAG, "Rows deleted by DAO: " + deletedRows);
+
+                if (deletedRows > 0) {
+                    activity.runOnUiThread(() -> queryCallBack.onSuccess(null));
+                } else {
+                    activity.runOnUiThread(() -> queryCallBack.onError(new Exception("Dish with ID " + dishId + " not found or already deleted.")));
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error deleting dish with ID: " + dishId, e);
+                activity.runOnUiThread(() -> queryCallBack.onError(e));
+            }
+        }).start();
+    }
+
+    /**
+     * Updates an existing dish in the database.
+     * This operation is performed asynchronously.
+     *
+     * @param activity      The activity context for UI thread operations (e.g., callbacks).
+     * @param dishToUpdate  The {@link com.mydishes.mydishes.Models.Dish} object with updated information.
+     *                      Ensure the ID of the dish is correctly set.
+     * @param queryCallBack Callback to be invoked on success or error.
+     *                      OnSuccess will be called with null (Void).
+     *                      OnError will be called with the encountered exception.
+     */
+    public void updateDish(Activity activity, com.mydishes.mydishes.Models.Dish dishToUpdate, QueryCallBack<Void> queryCallBack) {
+        new Thread(() -> {
+            try {
+                // Сначала получим существующую сущность Dish из БД, чтобы не потерять nutritionId и photoUri
+                DishWithProductsAndNutrition existingDishDetails = dishDao.getDishWithProductsAndNutrition(dishToUpdate.getId());
+                if (existingDishDetails == null || existingDishDetails.dish == null) {
+                    throw new Exception("Dish with ID " + dishToUpdate.getId() + " not found for update.");
+                }
+
+                Dish dbDish = existingDishDetails.dish;
+                dbDish.name = dishToUpdate.getName(); // Обновляем только имя
+
+                dishDao.updateDish(dbDish);
                 activity.runOnUiThread(() -> queryCallBack.onSuccess(null));
             } catch (Exception e) {
                 activity.runOnUiThread(() -> queryCallBack.onError(e));
