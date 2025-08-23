@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Objects;
 
 // Класс-модель представления КБЖУ блюда/продукта
-public class Nutrition {
+public class Nutrition implements Cloneable { // Added implements Cloneable
     private double calories; // ккалории
     private double protein; // белки
     private double fat; // жиры
@@ -126,5 +126,17 @@ public class Nutrition {
                 ", fat=" + fat +
                 ", carb=" + carb +
                 '}';
+    }
+
+    // Added clone method
+    @NonNull
+    @Override
+    public Nutrition clone() {
+        try {
+            return (Nutrition) super.clone();
+        } catch (CloneNotSupportedException e) {
+            // This should not happen since we are Cloneable
+            throw new AssertionError();
+        }
     }
 }

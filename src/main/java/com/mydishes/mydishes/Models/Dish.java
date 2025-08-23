@@ -2,11 +2,12 @@ package com.mydishes.mydishes.Models;
 
 import androidx.annotation.NonNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 // Класс-модель для блюда
-public class Dish {
+public class Dish implements Cloneable {
     private long id; // ID
     private String name; // Наименование
     private String photoUri; // Ссылка на фото
@@ -85,5 +86,37 @@ public class Dish {
                 ", nutrition=" + nutrition +
                 ", products=" + products +
                 '}';
+    }
+
+    @NonNull
+    @Override
+    public Dish clone() {
+        try {
+            Dish clonedDish = (Dish) super.clone();
+            clonedDish.id = this.id; // long is primitive, direct copy is fine
+            clonedDish.name = this.name; // String is immutable
+            clonedDish.photoUri = this.photoUri; // String is immutable
+
+            // Deep copy for Nutrition
+            if (this.nutrition != null) {
+                clonedDish.nutrition = this.nutrition.clone();
+            }
+
+            // Deep copy for List<Product>
+            if (this.products != null) {
+                clonedDish.products = new ArrayList<>();
+                for (Product product : this.products) {
+                    if (product != null) {
+                        clonedDish.products.add(product.clone());
+                    } else {
+                        clonedDish.products.add(null);
+                    }
+                }
+            }
+            return clonedDish;
+        } catch (CloneNotSupportedException e) {
+            // This should not happen since we are implementing Cloneable
+            throw new AssertionError();
+        }
     }
 }

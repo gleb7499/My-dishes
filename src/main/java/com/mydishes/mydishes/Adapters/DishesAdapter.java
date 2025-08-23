@@ -105,8 +105,7 @@ public class DishesAdapter extends BaseAdapter<Dish, DishesAdapter.DishViewHolde
 
         @Override
         public boolean areContentsTheSame(@NonNull Dish oldItem, @NonNull Dish newItem) {
-            boolean res = oldItem.equals(newItem);
-            return res;
+            return oldItem.equals(newItem);
         }
     }
 }

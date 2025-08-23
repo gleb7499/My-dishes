@@ -63,6 +63,9 @@ public class MainActivity extends AppCompatActivity {
         adapter = new DishesAdapter(dish -> {
             if (dish == null) return;
 
+            // копия текущего элемента, на который нажали, чтобы предотвратить мутабельность
+            Dish newDish = dish.clone();
+
             // нижний лист для отображения информации о блюде (фото, наименование, список ингредиентов)
             BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(MainActivity.this);
             View bottomSheetView = LayoutInflater.from(MainActivity.this).inflate(
@@ -86,15 +89,15 @@ public class MainActivity extends AppCompatActivity {
             TextView ingredientsTitleTextView = bottomSheetView.findViewById(R.id.bottom_sheet_ingredients_title);
 
             // устанавливаем название блюда
-            dishNameTextView.setText(dish.getName());
+            dishNameTextView.setText(newDish.getName());
 
             // обработка нажатия на название блюда
-            dishNameTextView.setOnClickListener(v -> DialogUtils.showEditDishNameDialog(MainActivity.this, dish.getName(), newName -> {
+            dishNameTextView.setOnClickListener(v -> DialogUtils.showEditDishNameDialog(MainActivity.this, newDish.getName(), newName -> {
                 // Обновляем имя в объекте Dish
-                dish.setName(newName);
+                newDish.setName(newName);
 
                 // Вызываем метод репозитория для обновления блюда в БД
-                dataRepository.updateDish(MainActivity.this, dish, new DataRepository.QueryCallBack<>() {
+                dataRepository.updateDish(MainActivity.this, newDish, new DataRepository.QueryCallBack<>() {
                     @Override
                     public void onSuccess(Void result) {
                         // Обновляем текст в TextView
@@ -110,13 +113,13 @@ public class MainActivity extends AppCompatActivity {
 
             // устанавливаем фото блюда
             Glide.with(MainActivity.this)
-                    .load(dish.getPhotoUri())
+                    .load(newDish.getPhotoUri())
                     .placeholder(R.drawable.placeholder)
                     .error(R.drawable.error_image)
                     .into(dishImage);
 
             // устанавливаем список продуктов (ингредиентов) в recycler view
-            List<Product> ingredients = dish.getProducts();
+            List<Product> ingredients = newDish.getProducts();
             if (ingredients != null && !ingredients.isEmpty()) {
                 ingredientsTitleTextView.setVisibility(View.VISIBLE);
                 ingredientsRecyclerView.setVisibility(View.VISIBLE);
