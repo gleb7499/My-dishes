@@ -48,7 +48,7 @@ public class DialogUtils {
 
         // Устанавливаем режим изменения размера для окна диалога (НЕ РАБОТАЕТ!)
         if (alertDialog.getWindow() != null) {
-            alertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+            alertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         }
 
         // Переопределяем OnClickListener для PositiveButton для валидации

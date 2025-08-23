@@ -31,6 +31,7 @@ import com.mydishes.mydishes.Utils.DialogUtils;
 import com.mydishes.mydishes.Utils.ViewUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 // Главное окно приложения (отображение списка созданных блюд)
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
     private DishesAdapter adapter;
     private DataRepository dataRepository;
+    private TextView noDishesTextView;
 
     @Override
     protected void onResume() {
@@ -55,7 +57,8 @@ public class MainActivity extends AppCompatActivity {
         getWindow().setStatusBarColor(android.graphics.Color.TRANSPARENT);
         setContentView(R.layout.activity_main);
 
-        LinearLayout linearLayout = findViewById(R.id.linear_layout);
+        LinearLayout linear_layout = findViewById(R.id.linear_layout);
+        ViewUtils.applyInsets(linear_layout, true, false, false, true);
         RecyclerView recyclerView = findViewById(R.id.add_products_recycler); // Присваиваем полю класса
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 
@@ -79,12 +82,9 @@ public class MainActivity extends AppCompatActivity {
                 bottomSheetDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
             }
 
-            // Добавляем слушатель закрытия диалога
-            bottomSheetDialog.setOnDismissListener(dialogInterface -> loadDishesFromDb());
-
             // элементы нижнего листа
             ImageView dishImage = bottomSheetView.findViewById(R.id.bottom_sheet_dish_image);
-            TextView dishNameTextView = bottomSheetView.findViewById(R.id.bottom_sheet_dish_name); // Изменено имя переменной во избежание конфликта
+            TextView dishNameTextView = bottomSheetView.findViewById(R.id.bottom_sheet_dish_name);
             RecyclerView ingredientsRecyclerView = bottomSheetView.findViewById(R.id.bottom_sheet_ingredients_recycler_view);
             TextView ingredientsTitleTextView = bottomSheetView.findViewById(R.id.bottom_sheet_ingredients_title);
 
@@ -102,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onSuccess(Void result) {
                         // Обновляем текст в TextView
                         dishNameTextView.setText(newName);
+                        loadDishesFromDb(); // Обновляем список после успешного обновления имени
                     }
 
                     @Override
@@ -144,12 +145,15 @@ public class MainActivity extends AppCompatActivity {
 
         // кнопка добавления нового блюда
         ImageButton addButton = findViewById(R.id.addButton);
-        ViewUtils.applyInsets(linearLayout, true, false, false, false);
         addButton.setOnClickListener(this::startAddActivity);
+
+        // элемент для сообщения об  отсутствии блюд в БД
+        noDishesTextView = findViewById(R.id.emptyStateText);
 
         // объект для работы с БД
         dataRepository = DataRepository.getInstance(getApplication());
     }
+
 
     // получаем экземпляр ItemTouchHelper для обработки свайпа и его действий
     @NonNull
@@ -195,13 +199,16 @@ public class MainActivity extends AppCompatActivity {
         return new ItemTouchHelper(simpleCallback);
     }
 
+
     // загрузка всей информации о всех блюдах из БД
     private void loadDishesFromDb() {
         dataRepository.getAllDishesWithDetails(this, new DataRepository.QueryCallBack<>() {
             @Override
             public void onSuccess(List<Dish> result) {
                 if (adapter != null) { // Добавлена проверка на null для adapter
+                    Collections.reverse(result); // Разворачиваем список (новые сверху)
                     adapter.submitList(result);
+                    noDishesTextView.setVisibility(result.isEmpty() ? View.VISIBLE : View.GONE);
                 }
             }
 
@@ -212,6 +219,8 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
+    // активити для добавления нового блюда
     private void startAddActivity(View v) {
         Intent intent = new Intent(this, AddActivity.class);
         startActivity(intent);

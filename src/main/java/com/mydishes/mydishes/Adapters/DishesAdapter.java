@@ -28,7 +28,7 @@ public class DishesAdapter extends BaseAdapter<Dish, DishesAdapter.DishViewHolde
 
     @Override
     protected int getLayoutId(int viewType) {
-        return R.layout.recycler_view_dish;
+        return R.layout.list_item_dish;
     }
 
     @Override

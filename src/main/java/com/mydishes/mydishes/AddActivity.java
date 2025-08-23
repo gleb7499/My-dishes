@@ -9,10 +9,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.search.SearchBar;
 import com.google.android.material.search.SearchView;
@@ -25,7 +27,8 @@ import com.mydishes.mydishes.Models.Product;
 import com.mydishes.mydishes.Models.ProductsSelectedManager;
 import com.mydishes.mydishes.Parser.EdostavkaParser;
 import com.mydishes.mydishes.Parser.Parser;
-import com.mydishes.mydishes.Parser.ProductFindCallback;
+import com.mydishes.mydishes.Parser.ParsingStateListener;
+import com.mydishes.mydishes.Parser.ProductParseCallback;
 import com.mydishes.mydishes.Utils.DialogUtils;
 import com.mydishes.mydishes.Utils.TextWatcherUtils;
 
@@ -54,7 +57,14 @@ public class AddActivity extends AppCompatActivity {
         if (searchRunnable != null) {
             handler.removeCallbacks(searchRunnable);
         }
-        ProductsSelectedManager.clear(); // Очищаем выбранные продукты при выходе
+        if (ProductsSelectedManager.size() > 0) {
+            AlertDialog alertDialog = new MaterialAlertDialogBuilder(AddActivity.this)
+                    .setTitle(R.string.added_ingredients_willnt_be_saved)
+                    .setPositiveButton(R.string.ok, (dialog, which) -> ProductsSelectedManager.clear())
+                    .setNegativeButton(R.string.cancel, null)
+                    .create();
+            alertDialog.show();
+        }
     }
 
     // создали активити
@@ -70,7 +80,22 @@ public class AddActivity extends AppCompatActivity {
         // настраиваем RecyclerView
         addProductsRecycler = findViewById(R.id.add_products_recycler);
         addProductsRecycler.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        productFindListAdapter = new ProductFindListAdapter(this);
+        // отключаем кнопку отображения элементов списка во время парсинга
+        productFindListAdapter = new ProductFindListAdapter(this, new ParsingStateListener() {
+            @Override
+            public void onParsingStarted() {
+                if (productListButton != null) {
+                    productListButton.setEnabled(false);
+                }
+            }
+
+            @Override
+            public void onParsingFinished() {
+                if (productListButton != null) {
+                    productListButton.setEnabled(true);
+                }
+            }
+        });
         addProductsRecycler.setAdapter(productFindListAdapter);
 
         // настраиваем поисковую строку, ProgressBar и textViewNothing
@@ -157,7 +182,12 @@ public class AddActivity extends AppCompatActivity {
 
     // запуск асинхронного поиска списка продуктов по запросу query с обработкой результата
     public void runSearch(String query) {
-        parser.findProductsAsync(this, query, new ProductFindCallback() {
+        parser.findProductsAsync(query, new ProductParseCallback<>() {
+            @Override
+            public void onParsingStarted() {
+                // TODO: Implement onParsingStarted if needed
+            }
+
             @Override
             public void onSuccess(List<Product> products) { // парсинг успешен
                 // Обновляем адаптер списка
@@ -174,6 +204,11 @@ public class AddActivity extends AppCompatActivity {
             public void onError(Exception e) { // ошибка парсинга!
                 progressBar.setVisibility(View.INVISIBLE);
                 Snackbar.make(productListButton, getString(R.string.error_parser_text) + ": " + e.getMessage(), Snackbar.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onParsingFinished() {
+                // TODO: Implement onParsingFinished if needed
             }
         });
     }
