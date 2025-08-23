@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Objects;
 
 // Класс-модель представления КБЖУ блюда/продукта
-public class Nutrition {
+public class Nutrition implements Cloneable { // Added implements Cloneable
     private double calories; // ккалории
     private double protein; // белки
     private double fat; // жиры
@@ -61,20 +61,44 @@ public class Nutrition {
     @NonNull
     @Contract("_ -> new")
     public static Nutrition calculate(@NonNull List<Product> products) {
-        double kcal = 0, protein = 0, fat = 0, carbs = 0;
-
-        for (Product p : products) {
-            double ratio = p.getMass() / 100.0;
-            Nutrition n = p.getNutrition();
-
-            kcal += n.getCalories() * ratio;
-            protein += n.getProtein() * ratio;
-            fat += n.getFat() * ratio;
-            carbs += n.getCarb() * ratio;
+        if (products.isEmpty()) {
+            throw new IllegalArgumentException("Список продуктов не может быть пустым");
         }
 
+        double kcal = 0, protein = 0, fat = 0, carbs = 0, mass = 0;
+        Nutrition result = new Nutrition();
+
+        // Посчитаем КБЖУ на всю массу продуктов
+        for (Product p : products) {
+            Nutrition n = p.getNutrition();
+            if (n == null) {
+                throw new IllegalArgumentException("Пищевая ценность продукта " + p.getName() + " не может быть null");
+            }
+            float currentProductMass = p.getMass();
+
+            mass += currentProductMass;
+
+            // Вычисляем коэффициент масштабирования один раз для каждого продукта
+            double scaleFactor = currentProductMass / 100.0;
+
+            // КБЖУ всей массы текущего продукта
+            kcal += n.getCalories() * scaleFactor;
+            protein += n.getProtein() * scaleFactor;
+            fat += n.getFat() * scaleFactor;
+            carbs += n.getCarb() * scaleFactor;
+        }
+
+        if (mass == 0) {
+            throw new IllegalArgumentException("Общая масса продуктов не может быть равна нулю");
+        }
+
+        result.setCalories(round(100.0 * kcal / mass));
+        result.setProtein(round(100.0 * protein / mass));
+        result.setFat(round(100.0 * fat / mass));
+        result.setCarb(round(100.0 * carbs / mass));
+
         // Результат -> новый объект Nutrition со значениями КБЖУ блюда
-        return new Nutrition(round(kcal), round(protein), round(fat), round(carbs));
+        return result;
     }
 
     // Метод для корректного округления значения
@@ -102,5 +126,17 @@ public class Nutrition {
                 ", fat=" + fat +
                 ", carb=" + carb +
                 '}';
+    }
+
+    // Added clone method
+    @NonNull
+    @Override
+    public Nutrition clone() {
+        try {
+            return (Nutrition) super.clone();
+        } catch (CloneNotSupportedException e) {
+            // This should not happen since we are Cloneable
+            throw new AssertionError();
+        }
     }
 }

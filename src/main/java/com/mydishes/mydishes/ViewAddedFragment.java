@@ -10,12 +10,10 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-import com.mydishes.mydishes.Adapters.ProductSelectedAdapter;
+import com.mydishes.mydishes.Adapters.IngredientsAdapter;
 import com.mydishes.mydishes.Models.ProductsSelectedManager;
-import com.mydishes.mydishes.databinding.FragmentViewAddedBinding;
 import com.mydishes.mydishes.Utils.ViewUtils;
-
-import java.util.ArrayList;
+import com.mydishes.mydishes.databinding.FragmentViewAddedBinding;
 
 // Отображение нижнего листа со списком выбранных продуктов для текущего блюда
 public class ViewAddedFragment extends BottomSheetDialogFragment {
@@ -24,6 +22,7 @@ public class ViewAddedFragment extends BottomSheetDialogFragment {
     public interface OnConfirmListener {
         void onConfirmed();
     }
+
     private OnConfirmListener listener;
 
     public void setOnConfirmListener(OnConfirmListener listener) {
@@ -31,7 +30,7 @@ public class ViewAddedFragment extends BottomSheetDialogFragment {
     }
 
     private FragmentViewAddedBinding binding; // связывание XML макета нижнего листа
-    private ProductSelectedAdapter adapter; // адаптер для списка выбранных продуктов
+    private IngredientsAdapter adapter; // адаптер для списка выбранных продуктов
 
     public ViewAddedFragment() {
         // пустой конструктор
@@ -51,20 +50,18 @@ public class ViewAddedFragment extends BottomSheetDialogFragment {
                              @Nullable Bundle savedInstanceState) {
         // раздули XML
         binding = FragmentViewAddedBinding.inflate(inflater, container, false);
-        binding.selectedProductsRecycler.setLayoutManager(
-                new LinearLayoutManager(requireContext())
-        );
+        binding.selectedProductsRecycler.setLayoutManager(new LinearLayoutManager(requireContext()));
 
         // при использовании FragmentViewAddedBinding можно обращаться к элементам макета напрямую
         // настроили и установили адаптер
-        adapter = new ProductSelectedAdapter(requireContext(), new ArrayList<>());
+        adapter = new IngredientsAdapter();
         binding.selectedProductsRecycler.setAdapter(adapter);
         ViewUtils.applyInsets(binding.addProductButton, false, true, false, false);
 
         // прослушка для кнопки добавления нового блюда из списка продуктов
         binding.addProductButton.setOnClickListener(v -> {
             if (listener != null) {
-                listener.onConfirmed();  // Сообщаем активити
+                listener.onConfirmed();  // выполняем действие
             }
             dismiss(); // закрываем bottom sheet
         });

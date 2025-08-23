@@ -4,9 +4,9 @@ import static com.mydishes.mydishes.Utils.ViewUtils.parseFloatSafe;
 
 import android.app.Activity;
 import android.content.Context;
+import android.text.InputFilter;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -25,144 +25,146 @@ import com.mydishes.mydishes.Models.Product;
 import com.mydishes.mydishes.Models.ProductsSelectedManager;
 import com.mydishes.mydishes.Parser.EdostavkaParser;
 import com.mydishes.mydishes.Parser.Parser;
+import com.mydishes.mydishes.Parser.ParsingStateListener;
 import com.mydishes.mydishes.Parser.ProductParseCallback;
 import com.mydishes.mydishes.R;
 import com.mydishes.mydishes.Utils.TextWatcherUtils;
 
-import java.util.List;
 import java.util.Objects;
 
-// Класс-адаптер для отображения найденных продуктов при парсинге продуктового сайта
-public class ProductFindListAdapter extends RecyclerView.Adapter<ProductFindListAdapter.ProductFindViewHolder> {
+public class ProductFindListAdapter extends BaseAdapter<Product, ProductFindListAdapter.ProductFindViewHolder> {
 
     private final Context context;
-    private final static Parser parser = new EdostavkaParser();
-    private final List<Product> products;
+    private final ParsingStateListener parsingStateListener;
+    private final Parser parser = new EdostavkaParser();
 
-    public ProductFindListAdapter(@NonNull Activity activity, List<Product> products) {
+    public ProductFindListAdapter(@NonNull Activity activity, ParsingStateListener listener) {
+        super(new ProductDiffCallback());
         this.context = activity;
-        this.products = products;
+        this.parsingStateListener = listener;
     }
 
-    // Обновление списка с учетом предыдущего содержимого
-    public void submitList(List<Product> newItems) {
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(
-                new GenericDiffCallback<>(
-                        products,                         // старый список
-                        newItems,                             // новый список
-                        (oldProduct, newProduct) -> Objects.equals(oldProduct.getName(), newProduct.getName()), // сравнение ID
-                        Product::equals                           // сравнение содержимого
-                )
-        );
-        products.clear();
-        products.addAll(newItems);
-        diffResult.dispatchUpdatesTo(this);
-    }
-
-    // Создается view для RecyclerView
-    @NonNull
     @Override
-    public ProductFindViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.list_item_product, parent, false);
-        return new ProductFindViewHolder(view);
+    protected int getLayoutId(int viewType) {
+        return R.layout.list_item_product;
     }
 
-    // Управление данными текущей view
     @Override
-    public void onBindViewHolder(@NonNull ProductFindViewHolder holder, int position) {
-        // Получаем и устанавливаем данные
-        Product product = products.get(position);
+    protected ProductFindViewHolder createViewHolder(@NonNull View itemView, int viewType) {
+        return new ProductFindViewHolder(itemView);
+    }
 
+    @Override
+    protected void bind(@NonNull ProductFindViewHolder holder, @NonNull Product product) {
         // Установили фото продукта
-        Glide.with(context)
+        Glide.with(context) // Используем context из конструктора адаптера
                 .load(product.getImageURL())
                 .placeholder(R.drawable.placeholder)
                 .error(R.drawable.error_image)
-                .into(holder.imageView);
+                .into(holder.productImage);
 
         // Установили наименование продукта
-        holder.textView.setText(product.getName());
+        holder.productName.setText(product.getName());
 
-        // Создаем диалог с вводом массы и обрабытваем его логику
+        // здесь масса продукта пока что не задана
+        holder.productMass.setVisibility(View.GONE);
+
+        // Создаем диалог с вводом массы и обрабатываем его логику
         holder.itemView.setOnClickListener(v -> {
-            // Надуваем XML макет в view вид
+            // раздуваем макет
             View dialogViewMass = LayoutInflater.from(context).inflate(R.layout.dialog_input_mass, null);
-
             TextInputLayout inputFieldMass = dialogViewMass.findViewById(R.id.inputMass);
             EditText editTextMass = inputFieldMass.getEditText();
 
             if (editTextMass == null) return;
 
-            // Убираем отображение предыдущих ошибок
-            TextWatcherUtils.addSimpleTextWatcher(editTextMass, s -> editTextMass.setError(null));
+            // Устанавливаем максимальную длину для EditText (например, 4 символов)
+            int maxLength = 4;
+            editTextMass.setFilters(new InputFilter[]{new InputFilter.LengthFilter(maxLength)});
 
-            // Диалог для ввода массы выбранного продукта
+            // Отключаем отображение старых ошибок
+            TextWatcherUtils.addSimpleTextWatcher(editTextMass, s -> {
+                if (inputFieldMass.getError() != null) inputFieldMass.setError(null);
+            });
+
+            // создаем диалог для ввода массы выбранного продукта
             AlertDialog dialog = new MaterialAlertDialogBuilder(context)
                     .setTitle(R.string.enter_products_mass)
                     .setMessage(product.getName())
                     .setView(dialogViewMass)
-                    .setPositiveButton(R.string.ok, null) // временно null!
+                    .setPositiveButton(R.string.ok, null) // Релаизация ниже
                     .setNegativeButton(R.string.cancel, (d, w) -> d.dismiss())
                     .create();
 
-            // Выполнение проверок введенного значения и др. действий при нажатии кнопки ОК
+            // Обработка введенного значения
             dialog.setOnShowListener(d -> {
                 Button okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
                 okButton.setOnClickListener(v1 -> {
-                    String mass = editTextMass.getText().toString().trim();
+                    String massStr = editTextMass.getText().toString().trim(); // Renamed to avoid confusion
 
-                    // Проверка введенного значения
-                    if (mass.isEmpty() || mass.length() > 7) {
+                    if (massStr.isEmpty() || massStr.length() > 7) {
                         inputFieldMass.setError(context.getString(R.string.error_value));
-                    } else {
-                        inputFieldMass.setError(null);
-
-                        // Обработка введённого значения
-                        // Получаем КБЖУ введённого продукта
-                        parser.parseProductDetailsAsync((Activity) context, product, new ProductParseCallback() {
-                            @Override
-                            public void onSuccess(Product product) {
-                                product.setMass(parseFloatSafe(mass));
-                                ProductsSelectedManager.add(product);
-                            }
-
-                            @Override
-                            public void onError(Exception e) {
-                                Snackbar.make(v1, "Ошибка: " + e.getMessage(), Snackbar.LENGTH_LONG).show();
-                            }
-                        });
-
-                        // Уничтожаем диалог
-                        dialog.dismiss();
-
-                        Snackbar.make(v, "Записан " + product.getName(), Snackbar.LENGTH_LONG).show();
+                        return;
                     }
+                    dialog.dismiss(); // Dismiss dialog before starting parsing
+
+                    // Получаем КБЖУ продукта с сайта
+                    // Передаем Activity как context, так как Parser.java этого требует
+                    parser.parseProductDetailsAsync(product, new ProductParseCallback<>() {
+                        @Override
+                        public void onParsingStarted() {
+                            if (parsingStateListener != null) {
+                                parsingStateListener.onParsingStarted();
+                            }
+                        }
+
+                        @Override
+                        public void onSuccess(Product parsedProduct) {
+                            parsedProduct.setMass(parseFloatSafe(massStr)); // устанавливаем массу
+                            ProductsSelectedManager.add(parsedProduct);
+                            Snackbar.make(holder.itemView, "Записан " + parsedProduct.getName(), Snackbar.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            Snackbar.make(holder.itemView, "Ошибка парсинга: " + e.getMessage(), Snackbar.LENGTH_LONG).show();
+                        }
+
+                        @Override
+                        public void onParsingFinished() {
+                            if (parsingStateListener != null) {
+                                parsingStateListener.onParsingFinished();
+                            }
+                        }
+                    });
                 });
             });
-
-            // Показать диалог
             dialog.show();
-
         });
     }
 
-    // Размер списка продуктов
-    @Override
-    public int getItemCount() {
-        return products.size();
-    }
-
-    // Класс текущего view
     public static final class ProductFindViewHolder extends RecyclerView.ViewHolder {
-        // Фото товара
-        private final ImageView imageView;
-        // Наименование товара
-        private final TextView textView;
+        private final ImageView productImage;
+        private final TextView productName;
+        private final TextView productMass;
 
         public ProductFindViewHolder(View view) {
             super(view);
-            imageView = view.findViewById(R.id.imageView);
-            textView = view.findViewById(R.id.nameDish);
+            productImage = view.findViewById(R.id.productImage);
+            productName = view.findViewById(R.id.productName);
+            productMass = view.findViewById(R.id.productMass);
+        }
+    }
+
+    private static class ProductDiffCallback extends DiffUtil.ItemCallback<Product> {
+        @Override
+        public boolean areItemsTheSame(@NonNull Product oldItem, @NonNull Product newItem) {
+            return Objects.equals(oldItem.getName(), newItem.getName());
+        }
+
+        @Override
+        public boolean areContentsTheSame(@NonNull Product oldItem, @NonNull Product newItem) {
+            return oldItem.equals(newItem);
         }
     }
 }

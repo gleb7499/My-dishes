@@ -1,39 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/recyclerViewDishes"
     android:layout_width="match_parent"
-    android:layout_height="110dp"
+    android:layout_height="115dp"
     android:backgroundTint="?attr/colorBackgroundFloating">
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/imageCard"
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/productImage"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:cardBackgroundColor="@android:color/transparent"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="0dp"
-        app:cardPreventCornerOverlap="false"
-        app:cardUseCompatPadding="true"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:contentDescription="@string/productsPhoto"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toTopOf="@id/divider"
+        app:layout_constraintWidth_percent="0.25"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_percent="0.9"
         app:layout_constraintHorizontal_bias="0.05"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent="0.25">
-
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="@string/productsPhoto"
-            android:scaleType="centerCrop" />
-
-    </androidx.cardview.widget.CardView>
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Large"
+        tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
     <TextView
-        android:id="@+id/nameDish"
+        android:id="@+id/productName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="15dp"
@@ -42,17 +33,18 @@
         android:textColor="?attr/colorOnSurface"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/textViewMass"
-        app:layout_constraintHorizontal_weight="0.6"
-        app:layout_constraintStart_toEndOf="@id/imageCard"
+        app:layout_constraintEnd_toStartOf="@id/productMass"
+        android:text="@string/test_product_name"
+        app:layout_constraintHorizontal_weight="1.0"
+        app:layout_constraintStart_toEndOf="@id/productImage"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textViewMass"
+        android:id="@+id/productMass"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="15dp"
-        android:alpha="0.5"
+        android:alpha="0.7"
         android:ellipsize="end"
         android:maxLines="1"
         android:textAlignment="textEnd"
@@ -60,8 +52,9 @@
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_weight="0.25"
-        app:layout_constraintStart_toEndOf="@id/nameDish"
+        android:text="250"
+        app:layout_constraintStart_toEndOf="@id/productName"
+        app:layout_constraintHorizontal_weight="0.35"
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.divider.MaterialDivider
@@ -73,7 +66,6 @@
         android:backgroundTint="?attr/colorOnSurface"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageCard" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -5,7 +5,7 @@ import androidx.annotation.NonNull;
 import java.util.Objects;
 
 // Класс-модель представления продукта
-public class Product {
+public class Product implements Cloneable { // Added implements Cloneable
     private String productURL; // ссылка на страницу продукта сайта парсинга
     private String imageURL; // ссылка на фотографию продукта
     private String name; // наименование продукта
@@ -66,13 +66,29 @@ public class Product {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Product)) return false;
-        Product product = (Product) o;
+        if (!(o instanceof Product product)) return false;
         return Float.compare(mass, product.mass) == 0 && Objects.equals(productURL, product.productURL) && Objects.equals(imageURL, product.imageURL) && Objects.equals(name, product.name) && Objects.equals(nutrition, product.nutrition);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(productURL, imageURL, name, nutrition, mass);
+    }
+
+    // Added clone method
+    @NonNull
+    @Override
+    public Product clone() {
+        try {
+            Product clonedProduct = (Product) super.clone();
+            // Deep copy for Nutrition object
+            if (this.nutrition != null) {
+                clonedProduct.nutrition = this.nutrition.clone();
+            }
+            return clonedProduct;
+        } catch (CloneNotSupportedException e) {
+            // This should not happen since we are Cloneable
+            throw new AssertionError();
+        }
     }
 }

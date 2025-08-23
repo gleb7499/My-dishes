@@ -1,11 +1,9 @@
-package com.mydishes.mydishes.Adapters;
+package com.mydishes.mydishes.Parser;
 
 import static org.junit.Assert.assertTrue;
 
 import com.mydishes.mydishes.Models.Nutrition;
 import com.mydishes.mydishes.Models.Product;
-import com.mydishes.mydishes.Parser.EdostavkaParser;
-import com.mydishes.mydishes.Parser.Parser;
 
 import org.junit.Before;
 import org.junit.Test;

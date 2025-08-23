@@ -41,6 +41,21 @@
 
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/emptyStateText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:alpha="0.5"
+        android:text="@string/invitation_to_create_a_dish"
+        android:textColor="?attr/colorOnSurface"
+        android:textSize="18sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/add_products_recycler"
         android:layout_width="match_parent"
@@ -49,7 +64,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linear_layout" />
-
+        app:layout_constraintTop_toBottomOf="@+id/linear_layout"
+        tools:listitem="@layout/list_item_dish" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
