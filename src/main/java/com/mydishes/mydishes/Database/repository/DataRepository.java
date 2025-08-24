@@ -1,7 +1,7 @@
 package com.mydishes.mydishes.Database.repository;
 
 import android.app.Activity;
-import android.app.Application;
+import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -68,10 +68,10 @@ public class DataRepository {
     /**
      * Приватный конструктор репозитория.
      *
-     * @param application Контекст приложения для инициализации базы данных.
+     * @param context Контекст приложения для инициализации базы данных.
      */
-    private DataRepository(Application application) {
-        AppDatabase db = AppDatabase.getDatabase(application);
+    private DataRepository(Context context) {
+        AppDatabase db = AppDatabase.getDatabase(context);
         dishDao = db.dishDao();
         productDao = db.productDao();
         nutritionDao = db.nutritionDao();
@@ -81,14 +81,14 @@ public class DataRepository {
     /**
      * Возвращает единственный экземпляр DataRepository.
      *
-     * @param application Контекст приложения.
+     * @param context Контекст приложения.
      * @return Экземпляр DataRepository.
      */
-    public static DataRepository getInstance(Application application) {
+    public static DataRepository getInstance(Context context) {
         if (instance == null) {
             synchronized (DataRepository.class) {
                 if (instance == null) {
-                    instance = new DataRepository(application);
+                    instance = new DataRepository(context);
                 }
             }
         }

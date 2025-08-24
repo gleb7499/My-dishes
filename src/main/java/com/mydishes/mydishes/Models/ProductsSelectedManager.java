@@ -29,4 +29,8 @@ public class ProductsSelectedManager {
     public static int size() {
         return products.size();
     }
+
+    public static void remove(Product product) {
+        products.remove(product);
+    }
 }

@@ -137,7 +137,7 @@ public class AddActivity extends AppCompatActivity {
         productListButton = findViewById(R.id.productListButton);
         applyInsets(productListButton, false, true, false, true);
         productListButton.setOnClickListener(v -> {
-            if (ProductsSelectedManager.getAll().isEmpty()) {
+            if (ProductsSelectedManager.size() == 0) {
                 Snackbar.make(productListButton, R.string.no_products_selected, Snackbar.LENGTH_SHORT).show();
                 return;
             }
