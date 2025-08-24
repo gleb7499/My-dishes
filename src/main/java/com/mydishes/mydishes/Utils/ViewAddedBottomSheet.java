@@ -1,4 +1,4 @@
-package com.mydishes.mydishes;
+package com.mydishes.mydishes.Utils;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -17,27 +17,19 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.mydishes.mydishes.Adapters.IngredientsAdapter;
 import com.mydishes.mydishes.Models.Product;
 import com.mydishes.mydishes.Models.ProductsSelectedManager;
-import com.mydishes.mydishes.Utils.ViewUtils;
+import com.mydishes.mydishes.R;
 import com.mydishes.mydishes.databinding.BottomSheetAddedIngredientsBinding;
 
 // Отображение нижнего листа со списком выбранных продуктов для текущего блюда
-public class ViewAddedFragment extends BottomSheetDialogFragment {
+public class ViewAddedBottomSheet extends BottomSheetDialogFragment {
 
-    // Интерфейс обратного вызова при завершении текущей активити (при нажатии кнопки добавления блюда -- выполнение onConfirmed())
-    public interface OnConfirmListener {
-        void onConfirmed();
-    }
-
-    private OnConfirmListener listener;
-
-    public void setOnConfirmListener(OnConfirmListener listener) {
-        this.listener = listener; // Установка действия при нажатии кнопки
-    }
+    public static final String REQUEST_KEY = "viewAddedBottomSheetRequestKey";
+    public static final String BUNDLE_KEY_CONFIRMED = "confirmed";
 
     private BottomSheetAddedIngredientsBinding binding; // связывание XML макета нижнего листа
     private IngredientsAdapter adapter; // адаптер для списка выбранных продуктов
 
-    public ViewAddedFragment() {
+    public ViewAddedBottomSheet() {
         // пустой конструктор
     }
 
@@ -66,9 +58,9 @@ public class ViewAddedFragment extends BottomSheetDialogFragment {
 
         // прослушка для кнопки добавления нового блюда из списка продуктов
         binding.addProductButton.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onConfirmed();  // выполняем действие
-            }
+            Bundle result = new Bundle();
+            result.putBoolean(BUNDLE_KEY_CONFIRMED, true);
+            getParentFragmentManager().setFragmentResult(REQUEST_KEY, result);
             dismiss(); // закрываем bottom sheet
         });
 
@@ -108,7 +100,7 @@ public class ViewAddedFragment extends BottomSheetDialogFragment {
                             ProductsSelectedManager.remove(product); // Удаляем продукт из списка
                             if (ProductsSelectedManager.size() == 0) {
                                 dialog.dismiss(); // Закрываем диалог
-                                ViewAddedFragment.this.dismiss(); // Закрываем фрагмент
+                                ViewAddedBottomSheet.this.dismiss(); // Закрываем фрагмент
                             }
                             adapter.submitList(ProductsSelectedManager.getAll()); // Обновляем список
                         }).create();

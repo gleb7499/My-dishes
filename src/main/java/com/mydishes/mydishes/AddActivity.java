@@ -31,13 +31,14 @@ import com.mydishes.mydishes.Parser.ParsingStateListener;
 import com.mydishes.mydishes.Parser.ProductParseCallback;
 import com.mydishes.mydishes.Utils.DialogUtils;
 import com.mydishes.mydishes.Utils.TextWatcherUtils;
+import com.mydishes.mydishes.Utils.ViewAddedBottomSheet;
 
 import java.util.List;
 
 // Класс экрана добавления блюда (поис продуктов, составления списка продуктов, создание блюда)
 public class AddActivity extends AppCompatActivity {
 
-    private ViewAddedFragment bottomSheet; // Поле для доступа к bottomSheet
+    // private ViewAddedBottomSheet bottomSheet; // Удалено, так как больше не нужно как поле класса
 
     private final Handler handler = new Handler(); // выполнение отложенного запроса к сайту
     private Runnable searchRunnable; // инструкции отложенного запроса к сайту
@@ -142,42 +143,40 @@ public class AddActivity extends AppCompatActivity {
                 return;
             }
             // Создаем нижний лист со списком выбранных продуктов и кнопкой "Добавить"
-            bottomSheet = new ViewAddedFragment();
-
-            bottomSheet.setOnConfirmListener(() -> DialogUtils.showEditDishNameDialog(AddActivity.this, null, newDishName -> {
-                Nutrition nutrition = Nutrition.calculate(ProductsSelectedManager.getAll());
-                // В AddActivity мы всегда создаем новое блюдо, photoUri может быть null или установлено ранее (если есть выбор фото)
-                // Предположим, что photoUri для нового блюда - пустая строка, если не выбрано.
-                // Если у вас есть логика выбора фото для блюда в AddActivity, используйте ее для получения photoUri.
-                String photoUri = ""; // Заглушка, если нет логики выбора фото
-
-                Dish dish = new Dish(newDishName, photoUri, nutrition, ProductsSelectedManager.getAll());
-
-                dataRepository.insertDishWithDetails(AddActivity.this, dish, new DataRepository.QueryCallBack<>() {
-                    @Override
-                    public void onSuccess(Long result) { // возврат - ID блюда в БД
-                        dish.setId(result);
-                        ProductsSelectedManager.clear(); // очистили список
-                        if (bottomSheet != null && bottomSheet.isVisible()) {
-                            bottomSheet.dismiss();
-                        }
-                        AddActivity.this.finish();
-                    }
-
-                    @Override
-                    public void onError(Exception e) {
-                        if (bottomSheet != null && bottomSheet.isVisible()) {
-                            bottomSheet.dismiss();
-                        }
-                        Snackbar.make(findViewById(android.R.id.content), getString(R.string.error_loading_dishes) + ": " + e.getMessage(), Snackbar.LENGTH_LONG).show();
-                    }
-                });
-            }));
-
+            ViewAddedBottomSheet viewAddedBottomSheet = new ViewAddedBottomSheet();
+            // Убрали setOnConfirmListener
             // показываем нижний лист со списком добавленных блюд
-            bottomSheet.show(getSupportFragmentManager(), bottomSheet.getTag());
+            viewAddedBottomSheet.show(getSupportFragmentManager(), viewAddedBottomSheet.getTag());
         });
 
+        // Слушатель для результата от ViewAddedBottomSheet
+        getSupportFragmentManager().setFragmentResultListener(ViewAddedBottomSheet.REQUEST_KEY, this, (requestKey, bundle) -> {
+            boolean confirmed = bundle.getBoolean(ViewAddedBottomSheet.BUNDLE_KEY_CONFIRMED);
+            if (confirmed) {
+                DialogUtils.showEditDishNameDialog(AddActivity.this, null, newDishName -> {
+                    Nutrition nutrition = Nutrition.calculate(ProductsSelectedManager.getAll());
+                    String photoUri = ""; // Заглушка, если нет логики выбора фото
+
+                    Dish dish = new Dish(newDishName, photoUri, nutrition, ProductsSelectedManager.getAll());
+
+                    dataRepository.insertDishWithDetails(AddActivity.this, dish, new DataRepository.QueryCallBack<>() {
+                        @Override
+                        public void onSuccess(Long result) { // возврат - ID блюда в БД
+                            dish.setId(result);
+                            ProductsSelectedManager.clear(); // очистили список
+                            // ViewAddedBottomSheet сам себя закрывает после отправки результата
+                            AddActivity.this.finish();
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            // ViewAddedBottomSheet сам себя закрывает
+                            Snackbar.make(findViewById(android.R.id.content), getString(R.string.error_loading_dishes) + ": " + e.getMessage(), Snackbar.LENGTH_LONG).show();
+                        }
+                    });
+                });
+            }
+        });
     }
 
     // запуск асинхронного поиска списка продуктов по запросу query с обработкой результата
