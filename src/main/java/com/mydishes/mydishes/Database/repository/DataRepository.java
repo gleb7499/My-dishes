@@ -49,6 +49,7 @@ public class DataRepository {
     @NonNull
     private static com.mydishes.mydishes.Models.Product getProduct(@NonNull ProductWithNutrition pwn) {
         com.mydishes.mydishes.Models.Product appProduct = new com.mydishes.mydishes.Models.Product();
+        appProduct.setId(pwn.product.id);
         appProduct.setName(pwn.product.name);
         appProduct.setProductURL(pwn.product.productURL);
         appProduct.setImageURL(pwn.product.imageURL);
@@ -291,6 +292,7 @@ public class DataRepository {
 
                 if (dishDetails.dishNutrition != null) {
                     com.mydishes.mydishes.Models.Nutrition mainNutrition = new com.mydishes.mydishes.Models.Nutrition();
+                    mainNutrition.setId(dishDetails.dishNutrition.id);
                     mainNutrition.setCalories(dishDetails.dishNutrition.calories);
                     mainNutrition.setProtein(dishDetails.dishNutrition.protein);
                     mainNutrition.setFat(dishDetails.dishNutrition.fat);
@@ -355,7 +357,7 @@ public class DataRepository {
     }
 
     /**
-     * Updates an existing dish in the database.
+     * Updates an existing dish in the database, including its nutrition and product list.
      * This operation is performed asynchronously.
      *
      * @param activity      The activity context for UI thread operations (e.g., callbacks).
@@ -368,18 +370,96 @@ public class DataRepository {
     public void updateDish(Activity activity, com.mydishes.mydishes.Models.Dish dishToUpdate, QueryCallBack<Void> queryCallBack) {
         new Thread(() -> {
             try {
-                // Сначала получим существующую сущность Dish из БД, чтобы не потерять nutritionId и photoUri
-                DishWithProductsAndNutrition existingDishDetails = dishDao.getDishWithProductsAndNutrition(dishToUpdate.getId());
-                if (existingDishDetails == null || existingDishDetails.dish == null) {
-                    throw new Exception("Dish with ID " + dishToUpdate.getId() + " not found for update.");
-                }
+                executorService.submit(() -> { // Submit a Callable for background execution
+                    long dishId = dishToUpdate.getId();
+                    if (dishId == 0) {
+                        throw new Exception("Dish ID is invalid, cannot update.");
+                    }
 
-                Dish dbDish = existingDishDetails.dish;
-                dbDish.name = dishToUpdate.getName(); // Обновляем только имя
+                    // Confirm dish exists and get its current nutritionId for potential cleanup
+                    DishWithProductsAndNutrition existingDishContainer = dishDao.getDishWithProductsAndNutrition(dishId);
+                    if (existingDishContainer == null || existingDishContainer.dish == null) {
+                        throw new Exception("Dish with ID " + dishId + " not found for update.");
+                    }
+                    // long oldDishNutritionId = existingDishContainer.dish.nutritionId; // Store if needed for explicit deletion
 
-                dishDao.updateDish(dbDish);
+                    // 1. Handle Dish's own Nutrition
+                    long finalDishNutritionFk;
+                    if (dishToUpdate.getNutrition() != null) {
+                        com.mydishes.mydishes.Models.Nutrition appDishNutrition = dishToUpdate.getNutrition();
+                        Nutrition dbDishNutritionEntity = adaptNutrition(appDishNutrition);
+
+                        if (appDishNutrition.getId() != 0) { // Model has ID, update existing Nutrition
+                            dbDishNutritionEntity.id = appDishNutrition.getId();
+                            nutritionDao.updateNutrition(dbDishNutritionEntity); // Предполагается, что этот метод существует в NutritionDao
+                            finalDishNutritionFk = appDishNutrition.getId();
+                        } else { // Model has no ID, insert new Nutrition
+                            finalDishNutritionFk = nutritionDao.insertNutrition(dbDishNutritionEntity);
+                        }
+                    } else { // Nutrition is null in the model, so unlink dish's nutrition
+                        finalDishNutritionFk = 0; // 0 или другое значение, означающее отсутствие связи
+                        // Опционально: если oldDishNutritionId != 0, можно удалить "осиротевшую" запись Nutrition
+                        // nutritionDao.deleteNutritionById(oldDishNutritionId); // Потребует этого метода в NutritionDao
+                    }
+
+                    // 2. Update Dish entity (name, photoUri, and link to its nutrition)
+                    Dish dishEntityForUpdate = new Dish(dishToUpdate.getName(), dishToUpdate.getPhotoUri(), finalDishNutritionFk);
+                    dishEntityForUpdate.id = dishId; // Важно для Room/JPA для определения обновляемой записи
+                    dishDao.updateDish(dishEntityForUpdate);
+
+                    // 3. Handle Products and their Nutrition
+                    // Сначала удаляем все существующие связи продуктов для этого блюда
+                    dishDao.deleteDishProductCrossRefsByDishId(dishId); // Предполагается, что этот метод существует в DishDao
+
+                    if (dishToUpdate.getProducts() != null && !dishToUpdate.getProducts().isEmpty()) {
+                        List<DishProductCrossRef> newCrossRefs = new ArrayList<>();
+                        for (com.mydishes.mydishes.Models.Product appProduct : dishToUpdate.getProducts()) {
+                            long productNutritionFk = 0; // По умолчанию продукт без пищевой ценности
+
+                            // 3a. Handle Product's Nutrition
+                            if (appProduct.getNutrition() != null) {
+                                com.mydishes.mydishes.Models.Nutrition appProductNutrition = appProduct.getNutrition();
+                                Nutrition dbProductNutritionEntity = adaptNutrition(appProductNutrition);
+
+                                if (appProductNutrition.getId() != 0) { // Модель пищевой ценности продукта имеет ID
+                                    dbProductNutritionEntity.id = appProductNutrition.getId();
+                                    nutritionDao.updateNutrition(dbProductNutritionEntity); // Предполагается в NutritionDao
+                                    productNutritionFk = appProductNutrition.getId();
+                                } else { // Модель пищевой ценности продукта не имеет ID, вставляем как новую
+                                    productNutritionFk = nutritionDao.insertNutrition(dbProductNutritionEntity);
+                                }
+                            }
+
+                            // 3b. Handle Product entity
+                            Product dbProductEntity = adaptProduct(appProduct, productNutritionFk);
+                            long savedOrUpdatedProductId;
+
+                            if (appProduct.getId() != 0) { // Модель продукта имеет ID, обновляем существующий продукт
+                                dbProductEntity.id = appProduct.getId();
+                                productDao.updateProduct(dbProductEntity); // Предполагается в ProductDao
+                                savedOrUpdatedProductId = appProduct.getId();
+                            } else { // Модель продукта не имеет ID, вставляем как новый продукт
+                                savedOrUpdatedProductId = productDao.insertProduct(dbProductEntity);
+                            }
+
+                            // 3c. Create cross-reference
+                            newCrossRefs.add(new DishProductCrossRef(dishId, savedOrUpdatedProductId));
+                        }
+
+                        // 3d. Insert all new cross-references
+                        if (!newCrossRefs.isEmpty()) {
+                            dishDao.insertDishProductCrossRefs(newCrossRefs);
+                        }
+                    }
+                    // Если dishToUpdate.getProducts() был null или пуст, все старые связи удалены,
+                    // и новые не добавлены, фактически очищая список продуктов для блюда.
+
+                    return null; // Значение для Callable<Void>
+                }).get(); // Блокирует поток new Thread() до завершения submit или выброса исключения
+
                 activity.runOnUiThread(() -> queryCallBack.onSuccess(null));
             } catch (Exception e) {
+                Log.e(TAG, "Error updating dish with ID: " + (dishToUpdate != null ? dishToUpdate.getId() : "null"), e);
                 activity.runOnUiThread(() -> queryCallBack.onError(e));
             }
         }).start();

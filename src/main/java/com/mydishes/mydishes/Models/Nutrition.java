@@ -9,6 +9,7 @@ import java.util.Objects;
 
 // Класс-модель представления КБЖУ блюда/продукта
 public class Nutrition implements Cloneable { // Added implements Cloneable
+    private long id; // ID
     private double calories; // ккалории
     private double protein; // белки
     private double fat; // жиры
@@ -23,6 +24,14 @@ public class Nutrition implements Cloneable { // Added implements Cloneable
 
     public Nutrition() {
         // Empty constructor!
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public double getCalories() {

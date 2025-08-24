@@ -5,6 +5,7 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Transaction;
+import androidx.room.Update;
 
 import com.mydishes.mydishes.Database.model.Product;
 import com.mydishes.mydishes.Database.model.relations.ProductWithNutrition;
@@ -33,4 +34,7 @@ public interface ProductDao {
     @Transaction
     @Query("SELECT * FROM products WHERE id IN (:productIds)")
     List<ProductWithNutrition> getProductsWithNutritionByIds(List<Long> productIds);
+
+    @Update
+    void updateProduct(Product product);
 }

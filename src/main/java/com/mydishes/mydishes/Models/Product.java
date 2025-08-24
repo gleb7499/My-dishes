@@ -6,11 +6,20 @@ import java.util.Objects;
 
 // Класс-модель представления продукта
 public class Product implements Cloneable { // Added implements Cloneable
+    private long id; // ID
     private String productURL; // ссылка на страницу продукта сайта парсинга
     private String imageURL; // ссылка на фотографию продукта
     private String name; // наименование продукта
     private Nutrition nutrition; // объект КБЖУ
     private float mass; // масса продукта
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 
     public String getProductURL() {
         return productURL;

@@ -75,10 +75,11 @@
     <string name="error_deleting">Ошибка удаления!</string>
     <string name="delete_confirmation">\'%1$s\'</string>
     <string name="error_loading_dishes">Ошибка добавления блюда в БД!</string>
-    <string name="error_update_name_dish">Ошибка обновления названия блюда!</string>
+    <string name="error_update_dish">Ошибка обновления блюда!</string>
     <string name="no_products_selected">Ни один продукт не выбран!</string>
     <string name="error_parser_text">Ошибка запроса!</string>
     <string name="test_product_name">Невероятно длинное название вкусного продукта, чтобы проверить перенос строк</string>
     <string name="invitation_to_create_a_dish">Чтобы создать блюдо, нажмите на +</string>
     <string name="added_ingredients_willnt_be_saved">Добавленные ингредиенты не будут сохранены!</string>
+    <string name="error_deleting_product_in_dish">Блюдо должно содержать как минимум один продукт!</string>
 </resources>
