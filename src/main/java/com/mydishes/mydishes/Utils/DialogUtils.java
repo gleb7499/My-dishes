@@ -82,8 +82,61 @@ public class DialogUtils {
         alertDialog.show();
     }
 
+
     @FunctionalInterface
     public interface OnDishNameEnteredListener {
         void onDishNameEntered(String newName);
+    }
+
+    public static void showInputMassDialog(Context context, String productName, OnMassEnteredListener listener) {
+        View dialogViewMass = LayoutInflater.from(context).inflate(R.layout.dialog_input_mass, null);
+        TextInputLayout inputFieldMass = dialogViewMass.findViewById(R.id.inputMass);
+        EditText editTextMass = inputFieldMass.getEditText();
+
+        if (editTextMass == null) return;
+
+        int maxLength = 4;
+        editTextMass.setFilters(new InputFilter[]{new InputFilter.LengthFilter(maxLength)});
+
+        TextWatcherUtils.addSimpleTextWatcher(editTextMass, s -> {
+            if (inputFieldMass.getError() != null) inputFieldMass.setError(null);
+        });
+
+        AlertDialog dialog = new MaterialAlertDialogBuilder(context)
+                .setTitle(R.string.enter_products_mass)
+                .setMessage(productName)
+                .setView(dialogViewMass)
+                .setPositiveButton(R.string.ok, null)
+                .setNegativeButton(R.string.cancel, (d, w) -> d.dismiss())
+                .create();
+
+        dialog.setOnShowListener(d -> {
+            editTextMass.requestFocus();
+            editTextMass.postDelayed(() -> {
+                InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null) {
+                    imm.showSoftInput(editTextMass, InputMethodManager.SHOW_IMPLICIT);
+                }
+            }, 100);
+
+            Button okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            okButton.setOnClickListener(v1 -> {
+                String massStr = editTextMass.getText().toString().trim();
+                if (massStr.isEmpty() || massStr.length() > maxLength) {
+                    inputFieldMass.setError(context.getString(R.string.error_value));
+                    return;
+                }
+                if (listener != null) {
+                    listener.onMassEntered(massStr);
+                }
+                dialog.dismiss();
+            });
+        });
+        dialog.show();
+    }
+
+    @FunctionalInterface
+    public interface OnMassEnteredListener {
+        void onMassEntered(String mass);
     }
 }

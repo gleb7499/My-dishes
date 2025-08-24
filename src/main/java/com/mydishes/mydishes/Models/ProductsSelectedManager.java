@@ -33,4 +33,8 @@ public class ProductsSelectedManager {
     public static void remove(Product product) {
         products.remove(product);
     }
+
+    public static void updateMass(@NonNull Product product, float mass) {
+        product.setMass(mass);
+    }
 }

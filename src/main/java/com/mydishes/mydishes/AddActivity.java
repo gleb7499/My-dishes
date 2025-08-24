@@ -19,7 +19,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.search.SearchBar;
 import com.google.android.material.search.SearchView;
 import com.google.android.material.snackbar.Snackbar;
-import com.mydishes.mydishes.Adapters.ProductFindListAdapter;
+import com.mydishes.mydishes.Adapters.ProductFindAdapter;
 import com.mydishes.mydishes.Database.repository.DataRepository;
 import com.mydishes.mydishes.Models.Dish;
 import com.mydishes.mydishes.Models.Nutrition;
@@ -45,7 +45,7 @@ public class AddActivity extends AppCompatActivity {
     private ProgressBar progressBar; // загрузка результата запроса
     private TextView textViewNothing; // отображение надписи о том, что ничего не найдено
     private RecyclerView addProductsRecycler; // отображение результата поиска (список продуктов)
-    private ProductFindListAdapter productFindListAdapter; // адаптер для RecyclerView
+    private ProductFindAdapter productFindAdapter; // адаптер для RecyclerView
     private FloatingActionButton productListButton; // отображение списка выбранных продуктов
     private final Parser parser = new EdostavkaParser(); // объект класса парсера
     private DataRepository dataRepository; // объект класса репозитория
@@ -82,7 +82,7 @@ public class AddActivity extends AppCompatActivity {
         addProductsRecycler = findViewById(R.id.add_products_recycler);
         addProductsRecycler.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         // отключаем кнопку отображения элементов списка во время парсинга
-        productFindListAdapter = new ProductFindListAdapter(this, new ParsingStateListener() {
+        productFindAdapter = new ProductFindAdapter(this, new ParsingStateListener() {
             @Override
             public void onParsingStarted() {
                 if (productListButton != null) {
@@ -97,7 +97,7 @@ public class AddActivity extends AppCompatActivity {
                 }
             }
         });
-        addProductsRecycler.setAdapter(productFindListAdapter);
+        addProductsRecycler.setAdapter(productFindAdapter);
 
         // настраиваем поисковую строку, ProgressBar и textViewNothing
         SearchBar searchBar = findViewById(R.id.searchBar);
@@ -194,7 +194,7 @@ public class AddActivity extends AppCompatActivity {
                 if (products.isEmpty()) {
                     textViewNothing.setVisibility(View.VISIBLE);
                 } else {
-                    productFindListAdapter.submitList(products);
+                    productFindAdapter.submitList(products);
                     addProductsRecycler.setVisibility(View.VISIBLE);
                 }
             }
