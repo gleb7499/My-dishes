@@ -82,4 +82,5 @@
     <string name="invitation_to_create_a_dish">Чтобы создать блюдо, нажмите на +</string>
     <string name="added_ingredients_willnt_be_saved">Добавленные ингредиенты не будут сохранены!</string>
     <string name="error_deleting_product_in_dish">Блюдо должно содержать как минимум один продукт!</string>
+    <string name="error_update_product">Ошибка обновления продукта!</string>
 </resources>

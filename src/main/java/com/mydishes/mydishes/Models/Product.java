@@ -1,17 +1,45 @@
 package com.mydishes.mydishes.Models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import androidx.annotation.NonNull;
 
 import java.util.Objects;
 
 // Класс-модель представления продукта
-public class Product implements Cloneable { // Added implements Cloneable
+public class Product implements Cloneable, Parcelable { // Added implements Parcelable
     private long id; // ID
     private String productURL; // ссылка на страницу продукта сайта парсинга
     private String imageURL; // ссылка на фотографию продукта
     private String name; // наименование продукта
     private Nutrition nutrition; // объект КБЖУ
     private float mass; // масса продукта
+
+    public static final Creator<Product> CREATOR = new Creator<Product>() {
+        @Override
+        public Product createFromParcel(Parcel in) {
+            return new Product(in);
+        }
+
+        @Override
+        public Product[] newArray(int size) {
+            return new Product[size];
+        }
+    };
+
+    public Product() {
+        // Default constructor
+    }
+
+    protected Product(Parcel in) {
+        id = in.readLong();
+        productURL = in.readString();
+        imageURL = in.readString();
+        name = in.readString();
+        nutrition = in.readParcelable(Nutrition.class.getClassLoader());
+        mass = in.readFloat();
+    }
 
     public long getId() {
         return id;
@@ -99,5 +127,20 @@ public class Product implements Cloneable { // Added implements Cloneable
             // This should not happen since we are Cloneable
             throw new AssertionError();
         }
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeLong(id);
+        dest.writeString(productURL);
+        dest.writeString(imageURL);
+        dest.writeString(name);
+        dest.writeParcelable(nutrition, flags);
+        dest.writeFloat(mass);
     }
 }

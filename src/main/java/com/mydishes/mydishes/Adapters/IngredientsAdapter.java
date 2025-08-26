@@ -2,17 +2,18 @@ package com.mydishes.mydishes.Adapters;
 
 import static com.mydishes.mydishes.Utils.ViewUtils.parseFloatSafe;
 
+import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.mydishes.mydishes.Models.Product;
-import com.mydishes.mydishes.Models.ProductsSelectedManager;
 import com.mydishes.mydishes.R;
 import com.mydishes.mydishes.Utils.DialogUtils;
 
@@ -21,9 +22,15 @@ import java.util.Objects;
 
 public class IngredientsAdapter extends BaseAdapter<Product, IngredientsAdapter.IngredientsViewHolder> {
     private static final DecimalFormat decimalFormat = new DecimalFormat("#.##");
+    public static final String REQUEST_KEY = "ingredientsAdapterRequestKey";
+    public static final String BUNDLE_KEY_PRODUCT = "productKey"; // New key for Product
+    public static final String BUNDLE_KEY_NEW_MASS = "newMassKey"; // New key for new mass
 
-    public IngredientsAdapter() {
+    private FragmentManager parentFragmentManager; // Store FragmentManager
+
+    public IngredientsAdapter(FragmentManager fragmentManager) { // Constructor to receive FragmentManager
         super(new ProductDiffCallback());
+        this.parentFragmentManager = fragmentManager;
     }
 
     @Override
@@ -49,13 +56,14 @@ public class IngredientsAdapter extends BaseAdapter<Product, IngredientsAdapter.
                 .error(R.drawable.error_image)
                 .into(holder.productImage);
 
-        holder.itemView.setOnClickListener(v -> {
-            DialogUtils.showInputMassDialog(holder.itemView.getContext(), product.getName(), massStr -> {
-                float mass = parseFloatSafe(massStr);
-                ProductsSelectedManager.updateMass(product, mass);
-                holder.productMass.setText(decimalFormat.format(mass) + " г");
-            });
-        });
+        holder.itemView.setOnClickListener(v -> DialogUtils.showInputMassDialog(holder.itemView.getContext(), product.getName(), massStr -> {
+            float mass = parseFloatSafe(massStr);
+            // Отправляем результат родительскому компоненту
+            Bundle bundleResult = new Bundle();
+            bundleResult.putParcelable(BUNDLE_KEY_PRODUCT, product.clone());
+            bundleResult.putFloat(BUNDLE_KEY_NEW_MASS, mass);
+            parentFragmentManager.setFragmentResult(REQUEST_KEY, bundleResult);
+        }));
     }
 
     public static class IngredientsViewHolder extends RecyclerView.ViewHolder {

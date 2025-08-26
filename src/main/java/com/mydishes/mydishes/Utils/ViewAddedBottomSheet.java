@@ -15,11 +15,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.snackbar.Snackbar;
 import com.mydishes.mydishes.Adapters.IngredientsAdapter;
 import com.mydishes.mydishes.Models.Product;
 import com.mydishes.mydishes.Models.ProductsSelectedManager;
 import com.mydishes.mydishes.R;
 import com.mydishes.mydishes.databinding.BottomSheetAddedIngredientsBinding;
+
+import java.util.List;
 
 // Отображение нижнего листа со списком выбранных продуктов для текущего блюда
 public class ViewAddedBottomSheet extends BottomSheetDialogFragment {
@@ -61,7 +64,8 @@ public class ViewAddedBottomSheet extends BottomSheetDialogFragment {
 
         // при использовании BottomSheetAddedIngredientsBinding можно обращаться к элементам макета напрямую
         // настроили и установили адаптер
-        adapter = new IngredientsAdapter();
+        // Pass FragmentManager to the adapter constructor as it's now required by IngredientsAdapter
+        adapter = new IngredientsAdapter(getParentFragmentManager());
         binding.bottomSheetAddedIngredientsRecycler.setAdapter(adapter);
         ViewUtils.applyInsets(binding.addProductButton, false, true, false, false);
 
@@ -76,6 +80,30 @@ public class ViewAddedBottomSheet extends BottomSheetDialogFragment {
         // обработка свайпа по элементу списка
         ItemTouchHelper itemTouchHelper = getItemTouchHelper();
         itemTouchHelper.attachToRecyclerView(binding.bottomSheetAddedIngredientsRecycler);
+
+        // обработка обновления информации о блюде от IngredientsAdapter
+        getParentFragmentManager().setFragmentResultListener(IngredientsAdapter.REQUEST_KEY, this, (requestKey, bundle) -> {
+            if (bundle.containsKey(IngredientsAdapter.BUNDLE_KEY_PRODUCT) && bundle.containsKey(IngredientsAdapter.BUNDLE_KEY_NEW_MASS)) {
+                Product productFromBundle = bundle.getParcelable(IngredientsAdapter.BUNDLE_KEY_PRODUCT);
+                float newMass = bundle.getFloat(IngredientsAdapter.BUNDLE_KEY_NEW_MASS, 0f);
+
+                List<Product> currentProducts = ProductsSelectedManager.getAll();
+                // Используем новый утилитный метод
+                List<Product> updatedList = ProductListUpdater.updateProductInList(currentProducts, productFromBundle, newMass);
+
+                if (updatedList != null) {
+                    ProductsSelectedManager.setAll(updatedList); // Обновляем список продуктов в ProductsSelectedManager
+                    adapter.submitList(updatedList); // Обновляем список новым экземпляром
+                } else {
+                    // Логика обработки случая, когда продукт не найден или произошла ошибка
+                    if (productFromBundle != null) {
+                        Snackbar.make(binding.getRoot(), getString(R.string.error_update_product) + " (продукт не найден для обновления): " + productFromBundle.getName(), Snackbar.LENGTH_LONG).show();
+                    } else {
+                        Snackbar.make(binding.getRoot(), getString(R.string.error_update_product), Snackbar.LENGTH_LONG).show();
+                    }
+                }
+            }
+        });
 
         return binding.getRoot();
     }

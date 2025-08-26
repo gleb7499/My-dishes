@@ -10,9 +10,9 @@ import java.util.List;
 // Класс-менеджер управления единым списком выбранных продуктов для текущего блюда
 public class ProductsSelectedManager {
 
-    private static final List<Product> products = new ArrayList<>();
+    private static List<Product> products = new ArrayList<>();
 
-    public static void add(Product product) {
+    public static void add(@NonNull Product product) {
         products.add(product);
     }
 
@@ -23,18 +23,18 @@ public class ProductsSelectedManager {
     @NonNull
     @Contract(" -> new")
     public static List<Product> getAll() {
-        return new ArrayList<>(products); // копия, чтобы нельзя было напрямую мутировать
+        return new ArrayList<>(products); // Возвращает новую оболочку списка, содержащую управляемые экземпляры продуктов
     }
 
     public static int size() {
         return products.size();
     }
 
-    public static void remove(Product product) {
-        products.remove(product);
+    public static void setAll(List<Product> updatedList) {
+        products = new ArrayList<>(updatedList);
     }
 
-    public static void updateMass(@NonNull Product product, float mass) {
-        product.setMass(mass);
+    public static void remove(Product product) {
+        products.remove(product); // Зависит от product.equals() или равенства ссылок
     }
 }

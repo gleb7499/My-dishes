@@ -20,6 +20,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.mydishes.mydishes.Adapters.IngredientsAdapter;
 import com.mydishes.mydishes.Database.repository.DataRepository;
 import com.mydishes.mydishes.Models.Dish;
+import com.mydishes.mydishes.Models.Nutrition;
 import com.mydishes.mydishes.Models.Product;
 import com.mydishes.mydishes.R;
 import com.mydishes.mydishes.databinding.BottomSheetDishDetailsBinding;
@@ -76,7 +77,7 @@ public class DishDetailsBottomSheet extends BottomSheetDialogFragment {
             binding.bottomSheetDishDetailsIngredientsTitle.setVisibility(View.VISIBLE);
             binding.bottomSheetDishDetailsIngredientsRecycler.setVisibility(View.VISIBLE);
             binding.bottomSheetDishDetailsIngredientsRecycler.setLayoutManager(new LinearLayoutManager(requireContext()));
-            adapter = new IngredientsAdapter();
+            adapter = new IngredientsAdapter(getParentFragmentManager());
             binding.bottomSheetDishDetailsIngredientsRecycler.setAdapter(adapter);
             adapter.submitList(new ArrayList<>(ingredients));
         } else {
@@ -107,6 +108,49 @@ public class DishDetailsBottomSheet extends BottomSheetDialogFragment {
                 }
             });
         }));
+
+        // обработка обновления информации о блюде от IngredientsAdapter
+        getParentFragmentManager().setFragmentResultListener(IngredientsAdapter.REQUEST_KEY, this, (requestKey, bundle) -> {
+            if (bundle.containsKey(IngredientsAdapter.BUNDLE_KEY_PRODUCT) && bundle.containsKey(IngredientsAdapter.BUNDLE_KEY_NEW_MASS)) {
+                Product productFromBundle = bundle.getParcelable(IngredientsAdapter.BUNDLE_KEY_PRODUCT);
+                float newMass = bundle.getFloat(IngredientsAdapter.BUNDLE_KEY_NEW_MASS, 0f);
+
+                List<Product> currentProducts = dish.getProducts();
+                // Используем новый утилитный метод
+                List<Product> updatedProductList = ProductListUpdater.updateProductInList(currentProducts, productFromBundle, newMass);
+
+                if (updatedProductList != null) {
+                    dish.setProducts(updatedProductList); // Обновляем список продуктов в объекте Dish
+
+                    // считаем новые КБЖУ для всего блюда
+                    Nutrition newOverallNutrition = Nutrition.calculate(dish.getProducts());
+                    dish.setNutrition(newOverallNutrition);
+
+                    // Обновление в БД
+                    dataRepository.updateDish(requireActivity(), dish, new DataRepository.QueryCallBack<>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                            adapter.submitList(dish.getProducts());
+                            Bundle bundleResult = new Bundle();
+                            bundleResult.putBoolean(BUNDLE_KEY_DISH_UPDATED, true);
+                            getParentFragmentManager().setFragmentResult(REQUEST_KEY, bundleResult);
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            Snackbar.make(binding.getRoot(), getString(R.string.error_update_dish) + ": " + e.getMessage(), Snackbar.LENGTH_LONG).show();
+                        }
+                    });
+                } else {
+                    // Логика обработки случая, когда продукт не найден или произошла ошибка
+                    if (productFromBundle != null) {
+                        Snackbar.make(binding.getRoot(), getString(R.string.error_update_product) + " (продукт не найден для обновления): " + productFromBundle.getName(), Snackbar.LENGTH_LONG).show();
+                    } else {
+                        Snackbar.make(binding.getRoot(), getString(R.string.error_update_product), Snackbar.LENGTH_LONG).show();
+                    }
+                }
+            }
+        });
 
         // обработка свайпа по элементу списка
         ItemTouchHelper itemTouchHelper = getItemTouchHelper();
