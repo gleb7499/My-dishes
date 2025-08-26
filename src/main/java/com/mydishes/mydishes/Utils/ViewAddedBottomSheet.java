@@ -37,7 +37,10 @@ public class ViewAddedBottomSheet extends BottomSheetDialogFragment {
         // пустой конструктор
     }
 
-
+    /**
+     * Вызывается при возобновлении фрагмента.
+     * Обновляет список продуктов в адаптере.
+     */
     @Override
     public void onResume() {
         super.onResume();
@@ -45,57 +48,73 @@ public class ViewAddedBottomSheet extends BottomSheetDialogFragment {
         adapter.submitList(ProductsSelectedManager.getAll());
     }
 
+    /**
+     * Вызывается при старте фрагмента.
+     * Устанавливает режим отображения клавиатуры, чтобы она не перекрывала BottomSheet.
+     */
     @Override
     public void onStart() {
         super.onStart();
+        // Настройка режима ввода, чтобы клавиатура не перекрывала BottomSheet
         if (getDialog() != null && getDialog().getWindow() != null) {
             getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
         }
     }
 
-
-    // создание листа
+    /**
+     * Вызывается для создания и возвращения представления иерархии, связанной с фрагментом.
+     *
+     * @param inflater           Объект LayoutInflater, который можно использовать для раздувания любых представлений во фрагменте.
+     * @param container          Если не null, это родительское представление, к которому будет присоединено представление фрагмента.
+     * @param savedInstanceState Если не null, этот фрагмент создается заново из предыдущего сохраненного состояния.
+     * @return Возвращает View для пользовательского интерфейса фрагмента.
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // раздули XML
+        // Инициализация ViewBinding
         binding = BottomSheetAddedIngredientsBinding.inflate(inflater, container, false);
+        // Настройка RecyclerView
         binding.bottomSheetAddedIngredientsRecycler.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        // при использовании BottomSheetAddedIngredientsBinding можно обращаться к элементам макета напрямую
-        // настроили и установили адаптер
-        // Pass FragmentManager to the adapter constructor as it's now required by IngredientsAdapter
+        // Инициализация и установка адаптера
         adapter = new IngredientsAdapter(getParentFragmentManager());
         binding.bottomSheetAddedIngredientsRecycler.setAdapter(adapter);
+        // Применение отступов для кнопки добавления продукта
         ViewUtils.applyInsets(binding.addProductButton, false, true, false, false);
 
-        // прослушка для кнопки добавления нового блюда из списка продуктов
+        // Установка слушателя нажатия на кнопку добавления продукта
         binding.addProductButton.setOnClickListener(v -> {
+            // Создание результата для родительского фрагмента/активности
             Bundle result = new Bundle();
             result.putBoolean(BUNDLE_KEY_CONFIRMED, true);
+            // Отправка результата и закрытие BottomSheet
             getParentFragmentManager().setFragmentResult(REQUEST_KEY, result);
-            dismiss(); // закрываем bottom sheet
+            dismiss();
         });
 
-        // обработка свайпа по элементу списка
+        // Настройка ItemTouchHelper для обработки свайпов по элементам списка
         ItemTouchHelper itemTouchHelper = getItemTouchHelper();
         itemTouchHelper.attachToRecyclerView(binding.bottomSheetAddedIngredientsRecycler);
 
-        // обработка обновления информации о блюде от IngredientsAdapter
+        // Установка слушателя для результатов от IngredientsAdapter (обновление массы продукта)
         getParentFragmentManager().setFragmentResultListener(IngredientsAdapter.REQUEST_KEY, this, (requestKey, bundle) -> {
+            // Проверка наличия необходимых данных в Bundle
             if (bundle.containsKey(IngredientsAdapter.BUNDLE_KEY_PRODUCT) && bundle.containsKey(IngredientsAdapter.BUNDLE_KEY_NEW_MASS)) {
+                // Извлечение данных из Bundle
                 Product productFromBundle = bundle.getParcelable(IngredientsAdapter.BUNDLE_KEY_PRODUCT);
                 float newMass = bundle.getFloat(IngredientsAdapter.BUNDLE_KEY_NEW_MASS, 0f);
 
                 List<Product> currentProducts = ProductsSelectedManager.getAll();
-                // Используем новый утилитный метод
+                // Обновление продукта в списке с использованием утилитного метода
                 List<Product> updatedList = ProductListUpdater.updateProductInList(currentProducts, productFromBundle, newMass);
 
+                // Обработка результата обновления
                 if (updatedList != null) {
-                    ProductsSelectedManager.setAll(updatedList); // Обновляем список продуктов в ProductsSelectedManager
-                    adapter.submitList(updatedList); // Обновляем список новым экземпляром
+                    ProductsSelectedManager.setAll(updatedList); // Обновление списка в менеджере
+                    adapter.submitList(updatedList); // Обновление списка в адаптере
                 } else {
-                    // Логика обработки случая, когда продукт не найден или произошла ошибка
+                    // Отображение сообщения об ошибке, если продукт не найден или произошла ошибка
                     if (productFromBundle != null) {
                         Snackbar.make(binding.getRoot(), getString(R.string.error_update_product) + " (продукт не найден для обновления): " + productFromBundle.getName(), Snackbar.LENGTH_LONG).show();
                     } else {
@@ -108,53 +127,65 @@ public class ViewAddedBottomSheet extends BottomSheetDialogFragment {
         return binding.getRoot();
     }
 
-
-    // получаем экземпляр ItemTouchHelper для обработки свайпа и его действий
+    /**
+     * Создает и настраивает ItemTouchHelper для обработки свайпов влево и вправо по элементам RecyclerView.
+     * При свайпе отображается диалог подтверждения удаления продукта.
+     *
+     * @return Настроенный экземпляр ItemTouchHelper.
+     */
     @NonNull
     private ItemTouchHelper getItemTouchHelper() {
+        // Создание SimpleCallback для ItemTouchHelper
         ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                return false;  // Для перетаскивания (drag&drop). Если не нужно — возвращаем false
+                return false;  // Перетаскивание не используется
             }
 
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 final int position = viewHolder.getAdapterPosition();
+                // Проверка валидности позиции элемента
                 if (position == RecyclerView.NO_POSITION || position >= adapter.getCurrentList().size()) {
-                    return; // Проверка валидности позиции
+                    return;
                 }
                 final Product product = adapter.getCurrentList().get(position);
 
+                // Отображение диалога подтверждения удаления
                 AlertDialog alertDialog = new MaterialAlertDialogBuilder(requireContext())
                         .setTitle(R.string.delete)
-                        .setMessage(getString(R.string.delete_confirmation, product.getName())) // Используем форматированную строку для подтверждения
+                        .setMessage(getString(R.string.delete_confirmation, product.getName()))
                         .setNegativeButton(R.string.cancel, (dialog, which) -> {
+                            // Отмена удаления, обновление элемента в списке
                             dialog.dismiss();
-                            adapter.notifyItemChanged(position); // Возвращаем элемент на место
+                            adapter.notifyItemChanged(position);
                         })
                         .setPositiveButton(R.string.ok, (dialog, which) -> {
-                            ProductsSelectedManager.remove(product); // Удаляем продукт из списка
+                            // Подтверждение удаления
+                            ProductsSelectedManager.remove(product); // Удаление продукта из менеджера
+                            // Если список продуктов пуст, закрываем диалог и BottomSheet
                             if (ProductsSelectedManager.size() == 0) {
-                                dialog.dismiss(); // Закрываем диалог
-                                ViewAddedBottomSheet.this.dismiss(); // Закрываем фрагмент
+                                dialog.dismiss();
+                                ViewAddedBottomSheet.this.dismiss();
                             }
-                            adapter.submitList(ProductsSelectedManager.getAll()); // Обновляем список
+                            adapter.submitList(ProductsSelectedManager.getAll()); // Обновление списка в адаптере
                         }).create();
                 alertDialog.show();
             }
         };
 
-        // привязываем свайп к RecyclerView
+        // Создание и возврат ItemTouchHelper
         return new ItemTouchHelper(simpleCallback);
     }
 
-
-    // перед уничтожением
+    /**
+     * Вызывается при уничтожении представления фрагмента.
+     * Освобождает ссылку на ViewBinding для предотвращения утечек памяти.
+     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        // сбрасываем биндинг против утечки памяти
+        // Очистка ViewBinding
         binding = null;
     }
 }

@@ -4,6 +4,7 @@ import static com.mydishes.mydishes.Utils.ViewUtils.applyInsets;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -35,56 +36,61 @@ import com.mydishes.mydishes.Utils.ViewAddedBottomSheet;
 
 import java.util.List;
 
-// Класс экрана добавления блюда (поис продуктов, составления списка продуктов, создание блюда)
+/**
+ * Активность для добавления нового блюда.
+ * Позволяет пользователю искать продукты, выбирать их, указывать название блюда и сохранять его в базу данных.
+ * Использует {@link EdostavkaParser} для поиска продуктов и {@link DataRepository} для взаимодействия с БД.
+ */
 public class AddActivity extends AppCompatActivity {
 
-    // private ViewAddedBottomSheet bottomSheet; // Удалено, так как больше не нужно как поле класса
+    // Handler для отложенного выполнения поисковых запросов
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    // Экземпляр парсера для получения данных о продуктах
+    private final Parser parser = new EdostavkaParser();
+    // Runnable для поискового запроса, позволяет отменять предыдущие запросы
+    private Runnable searchRunnable;
+    // Индикатор загрузки, отображается во время поиска продуктов
+    private ProgressBar progressBar;
+    // Текстовое поле, отображается, если ничего не найдено по запросу
+    private TextView textViewNothing;
+    // RecyclerView для отображения списка найденных продуктов
+    private RecyclerView addProductsRecycler;
+    // Адаптер для RecyclerView, управляющий отображением продуктов
+    private ProductFindAdapter productFindAdapter;
+    // Плавающая кнопка для отображения списка выбранных продуктов и начала процесса добавления блюда
+    private FloatingActionButton productListButton;
+    // Репозиторий для взаимодействия с базой данных
+    private DataRepository dataRepository;
 
-    private final Handler handler = new Handler(); // выполнение отложенного запроса к сайту
-    private Runnable searchRunnable; // инструкции отложенного запроса к сайту
-    private ProgressBar progressBar; // загрузка результата запроса
-    private TextView textViewNothing; // отображение надписи о том, что ничего не найдено
-    private RecyclerView addProductsRecycler; // отображение результата поиска (список продуктов)
-    private ProductFindAdapter productFindAdapter; // адаптер для RecyclerView
-    private FloatingActionButton productListButton; // отображение списка выбранных продуктов
-    private final Parser parser = new EdostavkaParser(); // объект класса парсера
-    private DataRepository dataRepository; // объект класса репозитория
-
-    // Метод уничтожения активити
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        // Удаляем очередь запроса к сайту, если она осталась в памяти
-        if (searchRunnable != null) {
-            handler.removeCallbacks(searchRunnable);
-        }
-        if (ProductsSelectedManager.size() > 0) {
-            AlertDialog alertDialog = new MaterialAlertDialogBuilder(AddActivity.this)
-                    .setTitle(R.string.added_ingredients_willnt_be_saved)
-                    .setPositiveButton(R.string.ok, (dialog, which) -> ProductsSelectedManager.clear())
-                    .setNegativeButton(R.string.cancel, null)
-                    .create();
-            alertDialog.show();
-        }
-    }
-
-    // создали активити
+    /**
+     * Вызывается при создании активности.
+     * Инициализирует UI компоненты, настраивает слушатели и RecyclerView.
+     *
+     * @param savedInstanceState Если активность пересоздается после предыдущего уничтожения,
+     *                           этот Bundle содержит данные, которые она в последний раз предоставила
+     *                           в {@link #onSaveInstanceState}. В противном случае это null.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Настройка отображения
         super.onCreate(savedInstanceState);
+        // Включение отображения "от края до края"
         EdgeToEdge.enable(this);
+        // Установка прозрачного цвета для навигационной панели и строки состояния
         getWindow().setNavigationBarColor(android.graphics.Color.TRANSPARENT);
         getWindow().setStatusBarColor(android.graphics.Color.TRANSPARENT);
+        // Установка макета для этой активности
         setContentView(R.layout.activity_add);
 
-        // настраиваем RecyclerView
+        // Инициализация RecyclerView для отображения найденных продуктов
         addProductsRecycler = findViewById(R.id.add_products_recycler);
         addProductsRecycler.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        // отключаем кнопку отображения элементов списка во время парсинга
+
+        // Инициализация адаптера для RecyclerView
+        // Передаем слушателя состояния парсинга для управления доступностью кнопки productListButton
         productFindAdapter = new ProductFindAdapter(this, new ParsingStateListener() {
             @Override
             public void onParsingStarted() {
+                // Отключаем кнопку, пока идет парсинг
                 if (productListButton != null) {
                     productListButton.setEnabled(false);
                 }
@@ -92,6 +98,7 @@ public class AddActivity extends AppCompatActivity {
 
             @Override
             public void onParsingFinished() {
+                // Включаем кнопку после завершения парсинга
                 if (productListButton != null) {
                     productListButton.setEnabled(true);
                 }
@@ -99,78 +106,91 @@ public class AddActivity extends AppCompatActivity {
         });
         addProductsRecycler.setAdapter(productFindAdapter);
 
-        // настраиваем поисковую строку, ProgressBar и textViewNothing
+        // Инициализация компонентов поиска: SearchBar, SearchView, ProgressBar, TextViewNothing
         SearchBar searchBar = findViewById(R.id.searchBar);
         SearchView searchView = findViewById(R.id.searchView);
         searchView.setupWithSearchBar(searchBar);
+        // Применение отступов для корректного отображения под системными элементами
         applyInsets(findViewById(R.id.searchLayout), true, false, false, false);
         progressBar = findViewById(R.id.progressBar);
         textViewNothing = findViewById(R.id.textViewNothing);
 
-        // получаем объект для управления БД
+        // Получение экземпляра DataRepository для работы с базой данных
         dataRepository = DataRepository.getInstance(this.getApplication());
 
-        // установка слушателя на изменение текста в строке поиска
+        // Установка слушателя на изменение текста в поле поиска SearchView
         TextWatcherUtils.addSimpleTextWatcher(searchView.getEditText(), s -> {
-            String query = s.trim();
+            String query = s.trim(); // Получаем текст запроса, удаляя пробелы по краям
 
-            // проверка длины запроса
+            // Отображаем ProgressBar и скрываем предыдущие результаты, если запрос достаточно длинный
             if (query.length() > 1) {
                 progressBar.setVisibility(View.VISIBLE);
                 textViewNothing.setVisibility(View.INVISIBLE);
                 addProductsRecycler.setVisibility(View.INVISIBLE);
             }
 
+            // Отменяем предыдущий запланированный поиск, если он есть
             if (searchRunnable != null) {
-                handler.removeCallbacks(searchRunnable); // Отменяем прошлую попытку
+                handler.removeCallbacks(searchRunnable);
             }
 
+            // Создаем новый Runnable для выполнения поиска
             searchRunnable = () -> {
-                if (query.length() > 1) { // Не парсим по 1 букве
+                // Выполняем поиск только если длина запроса больше 1 символа (для оптимизации)
+                if (query.length() > 1) {
                     runSearch(query);
                 }
             };
 
-            handler.postDelayed(searchRunnable, 500); // задержка после последнего ввода
+            // Запускаем поиск с задержкой в 500 мс после последнего ввода символа
+            handler.postDelayed(searchRunnable, 500);
         });
 
-        // настройка кнопки просмотра выбранных продуктов
+        // Настройка плавающей кнопки для просмотра выбранных продуктов
         productListButton = findViewById(R.id.productListButton);
+        // Применение отступов для корректного отображения кнопки
         applyInsets(productListButton, false, true, false, true);
         productListButton.setOnClickListener(v -> {
+            // Если нет выбранных продуктов, показываем Snackbar
             if (ProductsSelectedManager.size() == 0) {
                 Snackbar.make(productListButton, R.string.no_products_selected, Snackbar.LENGTH_SHORT).show();
                 return;
             }
-            // Создаем нижний лист со списком выбранных продуктов и кнопкой "Добавить"
+            // Создаем и показываем BottomSheet со списком выбранных продуктов
             ViewAddedBottomSheet viewAddedBottomSheet = new ViewAddedBottomSheet();
-            // Убрали setOnConfirmListener
-            // показываем нижний лист со списком добавленных блюд
             viewAddedBottomSheet.show(getSupportFragmentManager(), viewAddedBottomSheet.getTag());
         });
 
-        // Слушатель для результата от ViewAddedBottomSheet
+        // Регистрация слушателя для получения результата от ViewAddedBottomSheet (когда пользователь подтверждает добавление блюда)
         getSupportFragmentManager().setFragmentResultListener(ViewAddedBottomSheet.REQUEST_KEY, this, (requestKey, bundle) -> {
             boolean confirmed = bundle.getBoolean(ViewAddedBottomSheet.BUNDLE_KEY_CONFIRMED);
+            // Если пользователь подтвердил действие в BottomSheet
             if (confirmed) {
+                // Показываем диалог для ввода названия нового блюда
                 DialogUtils.showEditDishNameDialog(AddActivity.this, null, newDishName -> {
+                    // Рассчитываем общую пищевую ценность выбранных продуктов
                     Nutrition nutrition = Nutrition.calculate(ProductsSelectedManager.getAll());
-                    String photoUri = ""; // Заглушка, если нет логики выбора фото
+                    // TODO: Реализовать логику выбора или генерации URI для фото блюда
+                    String photoUri = ""; // Временная заглушка
 
+                    // Создаем объект Dish с введенным названием, рассчитанной пищевой ценностью и списком продуктов
                     Dish dish = new Dish(newDishName, photoUri, nutrition, ProductsSelectedManager.getAll());
 
+                    // Сохраняем блюдо в базу данных через DataRepository
                     dataRepository.insertDishWithDetails(AddActivity.this, dish, new DataRepository.QueryCallBack<>() {
                         @Override
-                        public void onSuccess(Long result) { // возврат - ID блюда в БД
+                        public void onSuccess(Long result) {
+                            // При успешном сохранении, присваиваем блюду полученный ID
                             dish.setId(result);
-                            ProductsSelectedManager.clear(); // очистили список
-                            // ViewAddedBottomSheet сам себя закрывает после отправки результата
+                            // Очищаем список выбранных продуктов
+                            ProductsSelectedManager.clear();
+                            // Завершаем текущую активность (AddActivity)
                             AddActivity.this.finish();
                         }
 
                         @Override
                         public void onError(Exception e) {
-                            // ViewAddedBottomSheet сам себя закрывает
+                            // При ошибке сохранения, показываем Snackbar с сообщением об ошибке
                             Snackbar.make(findViewById(android.R.id.content), getString(R.string.error_loading_dishes) + ": " + e.getMessage(), Snackbar.LENGTH_LONG).show();
                         }
                     });
@@ -179,36 +199,77 @@ public class AddActivity extends AppCompatActivity {
         });
     }
 
-    // запуск асинхронного поиска списка продуктов по запросу query с обработкой результата
+    /**
+     * Выполняет асинхронный поиск продуктов по заданному запросу.
+     * Использует {@link Parser#findProductsAsync} для получения данных.
+     * Обновляет UI в зависимости от результата поиска (отображает список продуктов, сообщение "ничего не найдено" или ошибку).
+     *
+     * @param query Строка поискового запроса.
+     */
     public void runSearch(String query) {
+        // Вызов асинхронного метода поиска у парсера
         parser.findProductsAsync(query, new ProductParseCallback<>() {
             @Override
             public void onParsingStarted() {
-                // TODO: Implement onParsingStarted if needed
+                // Метод обратного вызова при начале парсинга (можно добавить логику, если необходимо)
+                // Например, дополнительно управлять состоянием UI
             }
 
             @Override
-            public void onSuccess(List<Product> products) { // парсинг успешен
-                // Обновляем адаптер списка
+            public void onSuccess(List<Product> products) {
+                // Метод обратного вызова при успешном завершении парсинга
+                // Скрываем ProgressBar
                 progressBar.setVisibility(View.INVISIBLE);
+                // Если список продуктов пуст, показываем сообщение "ничего не найдено"
                 if (products.isEmpty()) {
                     textViewNothing.setVisibility(View.VISIBLE);
+                    addProductsRecycler.setVisibility(View.INVISIBLE);
                 } else {
+                    // Иначе, обновляем адаптер RecyclerView новыми данными и показываем список
                     productFindAdapter.submitList(products);
                     addProductsRecycler.setVisibility(View.VISIBLE);
+                    textViewNothing.setVisibility(View.INVISIBLE);
                 }
             }
 
             @Override
-            public void onError(Exception e) { // ошибка парсинга!
+            public void onError(Exception e) {
+                // Метод обратного вызова при ошибке парсинга
+                // Скрываем ProgressBar
                 progressBar.setVisibility(View.INVISIBLE);
+                // Показываем Snackbar с сообщением об ошибке
                 Snackbar.make(productListButton, getString(R.string.error_parser_text) + ": " + e.getMessage(), Snackbar.LENGTH_LONG).show();
             }
 
             @Override
             public void onParsingFinished() {
-                // TODO: Implement onParsingFinished if needed
+                // Метод обратного вызова по завершению парсинга (успех или ошибка)
+                // Можно добавить логику, если необходимо, например, обновить доступность кнопок
             }
         });
+    }
+
+    /**
+     * Вызывается при уничтожении активности.
+     * Очищает колбэки для Handler и проверяет, есть ли несохраненные выбранные продукты.
+     * Если есть, показывает диалог с предупреждением.
+     */
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Удаляем все запланированные Runnable из Handler, чтобы избежать утечек или нежелательного выполнения
+        if (searchRunnable != null) {
+            handler.removeCallbacks(searchRunnable);
+        }
+        // Проверяем, остались ли выбранные продукты, которые не были сохранены
+        if (ProductsSelectedManager.size() > 0) {
+            // Если да, показываем диалог с предупреждением
+            AlertDialog alertDialog = new MaterialAlertDialogBuilder(AddActivity.this)
+                    .setTitle(R.string.added_ingredients_willnt_be_saved) // "Добавленные ингредиенты не будут сохранены!"
+                    .setPositiveButton(R.string.ok, (dialog, which) -> ProductsSelectedManager.clear()) // Кнопка "ОК" очищает список
+                    .setNegativeButton(R.string.cancel, null) // Кнопка "Отмена" ничего не делает
+                    .create();
+            alertDialog.show();
+        }
     }
 }

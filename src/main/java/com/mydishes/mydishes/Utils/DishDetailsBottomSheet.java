@@ -28,75 +28,105 @@ import com.mydishes.mydishes.databinding.BottomSheetDishDetailsBinding;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Нижний лист (BottomSheet) для отображения и редактирования деталей блюда.
+ */
 public class DishDetailsBottomSheet extends BottomSheetDialogFragment {
 
     public static final String REQUEST_KEY = "dishDetailsRequestKey";
     public static final String BUNDLE_KEY_DISH_UPDATED = "dishUpdated";
-    private final Dish dish;
-    private BottomSheetDishDetailsBinding binding; // связывание XML макета нижнего листа
-    private IngredientsAdapter adapter; // адаптер для списка выбранных продуктов
-    private DataRepository dataRepository;
+    private final Dish dish; // Отображаемое блюдо
+    private BottomSheetDishDetailsBinding binding; // ViewBinding для макета
+    private IngredientsAdapter adapter; // Адаптер для списка ингредиентов
+    private DataRepository dataRepository; // Репозиторий для взаимодействия с базой данных
 
+    /**
+     * Конструктор для создания экземпляра DishDetailsBottomSheet.
+     *
+     * @param dish Блюдо, детали которого будут отображаться.
+     */
     public DishDetailsBottomSheet(Dish dish) {
         this.dish = dish;
-        // dataRepository initialization moved to onCreate
     }
 
+    /**
+     * Вызывается при создании фрагмента.
+     * Инициализирует DataRepository.
+     *
+     * @param savedInstanceState Если не null, этот фрагмент создается заново из предыдущего сохраненного состояния.
+     */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Инициализация DataRepository
         dataRepository = DataRepository.getInstance(requireContext().getApplicationContext());
     }
 
+    /**
+     * Вызывается при старте фрагмента.
+     * Устанавливает режим отображения клавиатуры, чтобы она не перекрывала BottomSheet.
+     */
     @Override
     public void onStart() {
         super.onStart();
+        // Настройка режима ввода, чтобы клавиатура не перекрывала BottomSheet
         if (getDialog() != null && getDialog().getWindow() != null) {
             getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
         }
     }
 
+    /**
+     * Вызывается для создания и возвращения представления иерархии, связанной с фрагментом.
+     * @param inflater Объект LayoutInflater, который можно использовать для раздувания любых представлений во фрагменте.
+     * @param container Если не null, это родительское представление, к которому будет присоединено представление фрагмента.
+     * @param savedInstanceState Если не null, этот фрагмент создается заново из предыдущего сохраненного состояния.
+     * @return Возвращает View для пользовательского интерфейса фрагмента.
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        // Инициализация ViewBinding
         binding = BottomSheetDishDetailsBinding.inflate(inflater, container, false);
 
-        // установили имя продукта
+        // Отображение имени блюда
         binding.bottomSheetDishName.setText(dish.getName());
 
-        // устанавливаем фото блюда
+        // Загрузка и отображение фото блюда с использованием Glide
         Glide.with(requireContext())
                 .load(dish.getPhotoUri())
-                .placeholder(R.drawable.placeholder)
-                .error(R.drawable.error_image)
+                .placeholder(R.drawable.placeholder) // Заглушка во время загрузки
+                .error(R.drawable.error_image) // Изображение при ошибке загрузки
                 .into(binding.bottomSheetDishImage);
 
-        // устанавливаем список продуктов (ингредиентов) в recycler view
+        // Отображение списка ингредиентов
         List<Product> ingredients = dish.getProducts();
         if (ingredients != null && !ingredients.isEmpty()) {
+            // Показ заголовка и RecyclerView для ингредиентов
             binding.bottomSheetDishDetailsIngredientsTitle.setVisibility(View.VISIBLE);
             binding.bottomSheetDishDetailsIngredientsRecycler.setVisibility(View.VISIBLE);
+            // Настройка RecyclerView
             binding.bottomSheetDishDetailsIngredientsRecycler.setLayoutManager(new LinearLayoutManager(requireContext()));
             adapter = new IngredientsAdapter(getParentFragmentManager());
             binding.bottomSheetDishDetailsIngredientsRecycler.setAdapter(adapter);
-            adapter.submitList(new ArrayList<>(ingredients));
+            adapter.submitList(new ArrayList<>(ingredients)); // Передача копии списка в адаптер
         } else {
+            // Скрытие заголовка и RecyclerView, если ингредиентов нет
             binding.bottomSheetDishDetailsIngredientsTitle.setVisibility(View.GONE);
             binding.bottomSheetDishDetailsIngredientsRecycler.setVisibility(View.GONE);
         }
 
-        // устанавливаем слушатель на название блюда чтобы поменять его
+        // Установка слушателя для редактирования имени блюда
         binding.bottomSheetDishName.setOnClickListener(v -> DialogUtils.showEditDishNameDialog(requireContext(), dish.getName(), newName -> {
-            // Обновляем имя в объекте Dish
+            // Обновление имени в объекте Dish
             dish.setName(newName);
 
-            // Вызываем метод репозитория для обновления блюда в БД
+            // Обновление блюда в базе данных
             dataRepository.updateDish(requireActivity(), dish, new DataRepository.QueryCallBack<>() {
                 @Override
                 public void onSuccess(Void result) {
-                    // Обновляем текст в TextView
+                    // Обновление отображаемого имени
                     binding.bottomSheetDishName.setText(newName);
-                    // Отправляем результат родительскому компоненту
+                    // Отправка результата родительскому компоненту об успешном обновлении
                     Bundle bundleResult = new Bundle();
                     bundleResult.putBoolean(BUNDLE_KEY_DISH_UPDATED, true);
                     getParentFragmentManager().setFragmentResult(REQUEST_KEY, bundleResult);
@@ -104,33 +134,39 @@ public class DishDetailsBottomSheet extends BottomSheetDialogFragment {
 
                 @Override
                 public void onError(Exception e) {
+                    // Отображение сообщения об ошибке
                     Snackbar.make(binding.getRoot(), getString(R.string.error_update_dish) + ": " + e.getMessage(), Snackbar.LENGTH_LONG).show();
                 }
             });
         }));
 
-        // обработка обновления информации о блюде от IngredientsAdapter
+        // Установка слушателя для результатов от IngredientsAdapter (обновление массы продукта)
         getParentFragmentManager().setFragmentResultListener(IngredientsAdapter.REQUEST_KEY, this, (requestKey, bundle) -> {
+            // Проверка наличия необходимых данных в Bundle
             if (bundle.containsKey(IngredientsAdapter.BUNDLE_KEY_PRODUCT) && bundle.containsKey(IngredientsAdapter.BUNDLE_KEY_NEW_MASS)) {
+                // Извлечение данных из Bundle
                 Product productFromBundle = bundle.getParcelable(IngredientsAdapter.BUNDLE_KEY_PRODUCT);
                 float newMass = bundle.getFloat(IngredientsAdapter.BUNDLE_KEY_NEW_MASS, 0f);
 
                 List<Product> currentProducts = dish.getProducts();
-                // Используем новый утилитный метод
+                // Обновление продукта в списке с использованием утилитного метода
                 List<Product> updatedProductList = ProductListUpdater.updateProductInList(currentProducts, productFromBundle, newMass);
 
+                // Обработка результата обновления списка продуктов
                 if (updatedProductList != null) {
-                    dish.setProducts(updatedProductList); // Обновляем список продуктов в объекте Dish
+                    dish.setProducts(updatedProductList); // Обновление списка продуктов в объекте Dish
 
-                    // считаем новые КБЖУ для всего блюда
+                    // Пересчет КБЖУ для всего блюда
                     Nutrition newOverallNutrition = Nutrition.calculate(dish.getProducts());
                     dish.setNutrition(newOverallNutrition);
 
-                    // Обновление в БД
+                    // Обновление блюда в базе данных
                     dataRepository.updateDish(requireActivity(), dish, new DataRepository.QueryCallBack<>() {
                         @Override
                         public void onSuccess(Void result) {
+                            // Обновление списка в адаптере
                             adapter.submitList(dish.getProducts());
+                            // Отправка результата родительскому компоненту об успешном обновлении
                             Bundle bundleResult = new Bundle();
                             bundleResult.putBoolean(BUNDLE_KEY_DISH_UPDATED, true);
                             getParentFragmentManager().setFragmentResult(REQUEST_KEY, bundleResult);
@@ -138,11 +174,12 @@ public class DishDetailsBottomSheet extends BottomSheetDialogFragment {
 
                         @Override
                         public void onError(Exception e) {
+                            // Отображение сообщения об ошибке
                             Snackbar.make(binding.getRoot(), getString(R.string.error_update_dish) + ": " + e.getMessage(), Snackbar.LENGTH_LONG).show();
                         }
                     });
                 } else {
-                    // Логика обработки случая, когда продукт не найден или произошла ошибка
+                    // Отображение сообщения об ошибке, если продукт не найден или произошла ошибка при обновлении
                     if (productFromBundle != null) {
                         Snackbar.make(binding.getRoot(), getString(R.string.error_update_product) + " (продукт не найден для обновления): " + productFromBundle.getName(), Snackbar.LENGTH_LONG).show();
                     } else {
@@ -152,46 +189,57 @@ public class DishDetailsBottomSheet extends BottomSheetDialogFragment {
             }
         });
 
-        // обработка свайпа по элементу списка
+        // Настройка ItemTouchHelper для обработки свайпов по элементам списка ингредиентов
         ItemTouchHelper itemTouchHelper = getItemTouchHelper();
         itemTouchHelper.attachToRecyclerView(binding.bottomSheetDishDetailsIngredientsRecycler);
 
         return binding.getRoot();
     }
 
-    // получаем экземпляр ItemTouchHelper для обработки свайпа и его действий
+    /**
+     * Создает и настраивает ItemTouchHelper для обработки свайпов влево и вправо по элементам RecyclerView.
+     * При свайпе отображается диалог подтверждения удаления продукта. Если это последний продукт в блюде, удаление не производится.
+     * @return Настроенный экземпляр ItemTouchHelper.
+     */
     @NonNull
     private ItemTouchHelper getItemTouchHelper() {
+        // Создание SimpleCallback для ItemTouchHelper
         ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                return false;  // Для перетаскивания (drag&drop). Если не нужно — возвращаем false
+                return false;  // Перетаскивание не используется
             }
 
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 final int position = viewHolder.getAdapterPosition();
                 int adapterSize = adapter.getCurrentList().size();
+                // Проверка валидности позиции элемента
                 if (position == RecyclerView.NO_POSITION || position >= adapterSize) {
-                    return; // Проверка валидности позиции
+                    return;
                 }
                 final Product product = adapter.getCurrentList().get(position);
 
+                // Отображение диалога подтверждения удаления
                 AlertDialog alertDialog = new MaterialAlertDialogBuilder(requireContext())
                         .setTitle(R.string.delete)
-                        .setMessage(getString(R.string.delete_confirmation, product.getName())) // Используем форматированную строку для подтверждения
+                        .setMessage(getString(R.string.delete_confirmation, product.getName()))
                         .setNegativeButton(R.string.cancel, (dialog, which) -> {
+                            // Отмена удаления, обновление элемента в списке для возврата на место
                             dialog.dismiss();
-                            adapter.notifyItemChanged(position); // Возвращаем элемент на место
+                            adapter.notifyItemChanged(position);
                         })
                         .setPositiveButton(R.string.ok, (dialog, which) -> {
+                            // Проверка, не является ли удаляемый продукт последним в списке
                             if (adapterSize > 1) {
-                                dish.getProducts().remove(position); // удаляем продукт из списка
+                                dish.getProducts().remove(position); // Удаление продукта из списка в объекте Dish
+                                // Обновление блюда в базе данных
                                 dataRepository.updateDish(requireActivity(), dish, new DataRepository.QueryCallBack<>() {
                                     @Override
                                     public void onSuccess(Void result) {
-                                        adapter.submitList(new ArrayList<>(dish.getProducts())); // Обновляем список новым экземпляром
-                                        // Отправляем результат родительскому компоненту
+                                        // Обновление списка в адаптере
+                                        adapter.submitList(new ArrayList<>(dish.getProducts()));
+                                        // Отправка результата родительскому компоненту об успешном обновлении
                                         Bundle bundleResult = new Bundle();
                                         bundleResult.putBoolean(BUNDLE_KEY_DISH_UPDATED, true);
                                         getParentFragmentManager().setFragmentResult(REQUEST_KEY, bundleResult);
@@ -199,11 +247,13 @@ public class DishDetailsBottomSheet extends BottomSheetDialogFragment {
 
                                     @Override
                                     public void onError(Exception e) {
+                                        // Отображение сообщения об ошибке и возврат элемента на место
                                         Snackbar.make(binding.getRoot(), getString(R.string.error_update_dish) + ": " + e, Snackbar.LENGTH_LONG).show();
                                         adapter.notifyItemChanged(position);
                                     }
                                 });
                             } else {
+                                // Если это последний продукт, отменяем удаление и показываем сообщение
                                 adapter.notifyItemChanged(position); // Возвращаем элемент на место
                                 Snackbar.make(binding.getRoot(), getString(R.string.error_deleting_product_in_dish), Snackbar.LENGTH_LONG).show();
                             }
@@ -212,7 +262,7 @@ public class DishDetailsBottomSheet extends BottomSheetDialogFragment {
             }
         };
 
-        // привязываем свайп к RecyclerView
+        // Создание и возврат ItemTouchHelper
         return new ItemTouchHelper(simpleCallback);
     }
 }

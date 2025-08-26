@@ -8,6 +8,12 @@ import androidx.annotation.NonNull;
 
 // Класс для упрощения вида в коде TextWatcher. Использовать, когда нужен только один метод из трех
 public class TextWatcherUtils {
+    /**
+     * Добавляет простой TextWatcher к EditText, который реагирует только на изменение текста.
+     *
+     * @param editText          EditText, к которому добавляется TextWatcher.
+     * @param simpleTextChanged Слушатель для обработки изменения текста.
+     */
     public static void addSimpleTextWatcher(@NonNull EditText editText, SimpleTextChanged simpleTextChanged) {
         editText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -17,6 +23,7 @@ public class TextWatcherUtils {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                // Вызов слушателя при изменении текста
                 simpleTextChanged.onTextChanged(charSequence.toString());
             }
 
@@ -27,8 +34,16 @@ public class TextWatcherUtils {
         });
     }
 
+    /**
+     * Функциональный интерфейс для обработки изменения текста в EditText.
+     */
     @FunctionalInterface
     public interface SimpleTextChanged {
+        /**
+         * Вызывается при изменении текста.
+         *
+         * @param s Новый текст в EditText.
+         */
         void onTextChanged(String s);
     }
 }

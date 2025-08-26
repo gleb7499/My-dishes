@@ -11,16 +11,33 @@ import com.mydishes.mydishes.Database.model.Product;
 
 import java.util.List;
 
+/**
+ * Представляет блюдо вместе с его пищевой ценностью и списком продуктов (также с их пищевой ценностью).
+ * Используется для комплексных запросов к базе данных.
+ */
 public class DishWithProductsAndNutrition {
+    /**
+     * Встроенный объект Dish.
+     */
     @Embedded
     public Dish dish;
 
+    /**
+     * Связанный объект Nutrition для самого блюда.
+     * Связь осуществляется через поле nutritionId в Dish и id в Nutrition.
+     */
     @Relation(
             parentColumn = "nutritionId", // из Dish
             entityColumn = "id"          // из Nutrition
     )
     public Nutrition dishNutrition; // КБЖУ самого блюда
 
+    /**
+     * Список продуктов, входящих в состав блюда.
+     * Связь многие-ко-многим через таблицу DishProductCrossRef.
+     * Пищевую ценность каждого продукта (ProductWithNutrition) нужно будет загружать отдельно
+     * или обрабатывать в DataRepository.
+     */
     @Relation(
             parentColumn = "id", // Dish.id
             entityColumn = "id", // Product.id

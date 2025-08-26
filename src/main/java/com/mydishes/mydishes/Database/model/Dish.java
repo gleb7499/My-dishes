@@ -6,6 +6,9 @@ import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
+/**
+ * Представляет блюдо в базе данных.
+ */
 @Entity(tableName = "dishes",
         foreignKeys = @ForeignKey(entity = Nutrition.class,
                 parentColumns = "id",
@@ -22,11 +25,19 @@ public class Dish {
     @ColumnInfo(name = "nutritionId")
     public long nutritionId; // Внешний ключ для Nutrition
 
-    // Пустой конструктор для Room
+    /**
+     * Пустой конструктор для Room.
+     */
     public Dish() {
     }
 
-    // Конструктор для удобства (без ID, так как он autoGenerate)
+    /**
+     * Конструктор для создания объекта Dish.
+     *
+     * @param name        Название блюда.
+     * @param photoUri    URI фотографии блюда.
+     * @param nutritionId Идентификатор пищевой ценности.
+     */
     public Dish(String name, String photoUri, long nutritionId) {
         this.name = name;
         this.photoUri = photoUri;

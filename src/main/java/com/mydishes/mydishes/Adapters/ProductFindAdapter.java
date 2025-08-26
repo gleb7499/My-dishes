@@ -25,50 +25,82 @@ import com.mydishes.mydishes.Utils.DialogUtils;
 
 import java.util.Objects;
 
+/**
+ * Адаптер для отображения списка найденных продуктов в RecyclerView.
+ * Позволяет пользователю выбрать продукт, указать его массу и добавить в список выбранных.
+ */
 public class ProductFindAdapter extends BaseAdapter<Product, ProductFindAdapter.ProductFindViewHolder> {
 
     private final Context context;
     private final ParsingStateListener parsingStateListener;
-    private final Parser parser = new EdostavkaParser();
+    private final Parser parser = new EdostavkaParser(); // Используется для получения детальной информации о продукте
 
+    /**
+     * Конструктор для ProductFindAdapter.
+     *
+     * @param activity Контекст Activity, необходимый для отображения диалогов и Glide.
+     * @param listener Слушатель состояния парсинга.
+     */
     public ProductFindAdapter(@NonNull Activity activity, ParsingStateListener listener) {
         super(new ProductDiffCallback());
         this.context = activity;
         this.parsingStateListener = listener;
     }
 
+    /**
+     * Возвращает идентификатор макета для элемента списка.
+     *
+     * @param viewType Тип представления (не используется в данном адаптере).
+     * @return Идентификатор макета R.layout.list_item_product.
+     */
     @Override
     protected int getLayoutId(int viewType) {
+        // Используем стандартный макет для элемента списка продуктов
         return R.layout.list_item_product;
     }
 
+    /**
+     * Создает новый ViewHolder для элемента списка.
+     *
+     * @param itemView Представление элемента списка.
+     * @param viewType Тип представления (не используется в данном адаптере).
+     * @return Новый экземпляр ProductFindViewHolder.
+     */
     @Override
     protected ProductFindViewHolder createViewHolder(@NonNull View itemView, int viewType) {
+        // Создаем и возвращаем ViewHolder для элемента списка
         return new ProductFindViewHolder(itemView);
     }
 
+    /**
+     * Привязывает данные продукта к ViewHolder и устанавливает обработчик клика.
+     *
+     * @param holder  ViewHolder для привязки данных.
+     * @param product Объект Product для отображения.
+     */
     @Override
     protected void bind(@NonNull ProductFindViewHolder holder, @NonNull Product product) {
-        // Установили фото продукта
+        // Загрузка изображения продукта с помощью Glide
         Glide.with(context) // Используем context из конструктора адаптера
                 .load(product.getImageURL())
-                .placeholder(R.drawable.placeholder)
-                .error(R.drawable.error_image)
+                .placeholder(R.drawable.placeholder) // Изображение-заглушка на время загрузки
+                .error(R.drawable.error_image) // Изображение при ошибке загрузки
                 .into(holder.productImage);
 
-        // Установили наименование продукта
+        // Установка наименования продукта
         holder.productName.setText(product.getName());
 
-        // здесь масса продукта пока что не задана
+        // Скрытие текстового поля массы, так как она будет введена пользователем
         holder.productMass.setVisibility(View.GONE);
 
-        // Создаем диалог с вводом массы и обрабатываем его логику
+        // Установка слушателя кликов для открытия диалога ввода массы
         holder.itemView.setOnClickListener(v -> {
             DialogUtils.showInputMassDialog(context, product.getName(), massStr -> {
-                // Получаем КБЖУ продукта с сайта
+                // Асинхронный парсинг деталей продукта (КБЖУ) после ввода массы
                 parser.parseProductDetailsAsync(product, new ProductParseCallback<>() {
                     @Override
                     public void onParsingStarted() {
+                        // Уведомление слушателя о начале парсинга
                         if (parsingStateListener != null) {
                             parsingStateListener.onParsingStarted();
                         }
@@ -76,18 +108,23 @@ public class ProductFindAdapter extends BaseAdapter<Product, ProductFindAdapter.
 
                     @Override
                     public void onSuccess(Product parsedProduct) {
-                        parsedProduct.setMass(parseFloatSafe(massStr)); // устанавливаем массу
+                        // Установка введенной массы для распарсенного продукта
+                        parsedProduct.setMass(parseFloatSafe(massStr));
+                        // Добавление продукта в менеджер выбранных продуктов
                         ProductsSelectedManager.add(parsedProduct);
+                        // Отображение Snackbar с подтверждением добавления
                         Snackbar.make(holder.itemView, "Записан " + parsedProduct.getName(), Snackbar.LENGTH_SHORT).show();
                     }
 
                     @Override
                     public void onError(Exception e) {
+                        // Отображение Snackbar с сообщением об ошибке парсинга
                         Snackbar.make(holder.itemView, "Ошибка парсинга: " + e.getMessage(), Snackbar.LENGTH_LONG).show();
                     }
 
                     @Override
                     public void onParsingFinished() {
+                        // Уведомление слушателя о завершении парсинга
                         if (parsingStateListener != null) {
                             parsingStateListener.onParsingFinished();
                         }
@@ -97,27 +134,55 @@ public class ProductFindAdapter extends BaseAdapter<Product, ProductFindAdapter.
         });
     }
 
+    /**
+     * ViewHolder для отображения информации о найденном продукте.
+     */
     public static final class ProductFindViewHolder extends RecyclerView.ViewHolder {
         private final ImageView productImage;
         private final TextView productName;
-        private final TextView productMass;
+        private final TextView productMass; // Хотя и скрыто, оно присутствует в макете
 
+        /**
+         * Конструктор для ProductFindViewHolder.
+         *
+         * @param view Представление элемента списка.
+         */
         public ProductFindViewHolder(View view) {
             super(view);
+            // Инициализация View-компонентов
             productImage = view.findViewById(R.id.productImage);
             productName = view.findViewById(R.id.productName);
             productMass = view.findViewById(R.id.productMass);
         }
     }
 
+    /**
+     * Callback для DiffUtil для сравнения элементов списка продуктов.
+     */
     private static class ProductDiffCallback extends DiffUtil.ItemCallback<Product> {
+        /**
+         * Проверяет, являются ли два элемента одним и тем же элементом.
+         *
+         * @param oldItem Старый элемент.
+         * @param newItem Новый элемент.
+         * @return True, если элементы являются одним и тем же (сравниваются по имени), иначе false.
+         */
         @Override
         public boolean areItemsTheSame(@NonNull Product oldItem, @NonNull Product newItem) {
+            // Сравниваем продукты по имени, так как ID может быть не уникальным до парсинга деталей
             return Objects.equals(oldItem.getName(), newItem.getName());
         }
 
+        /**
+         * Проверяет, имеют ли два элемента одинаковое содержимое.
+         *
+         * @param oldItem Старый элемент.
+         * @param newItem Новый элемент.
+         * @return True, если содержимое элементов одинаково, иначе false.
+         */
         @Override
         public boolean areContentsTheSame(@NonNull Product oldItem, @NonNull Product newItem) {
+            // Сравниваем объекты Product на полное равенство
             return oldItem.equals(newItem);
         }
     }
