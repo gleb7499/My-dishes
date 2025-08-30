@@ -4,6 +4,7 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Update;
 
 import com.mydishes.mydishes.Database.model.Nutrition;
 
@@ -19,4 +20,7 @@ public interface NutritionDao {
 
     @Query("SELECT * FROM nutrition WHERE id = :nutritionId")
     Nutrition getNutritionById(long nutritionId);
+
+    @Update
+    void updateNutrition(Nutrition nutrition);
 }

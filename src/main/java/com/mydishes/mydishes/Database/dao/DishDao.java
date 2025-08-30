@@ -41,4 +41,7 @@ public interface DishDao {
 
     @Update
     void updateDish(Dish dish);
+
+    @Query("DELETE FROM dish_product_cross_ref WHERE dishId = :dishId")
+    void deleteDishProductCrossRefsByDishId(long dishId);
 }

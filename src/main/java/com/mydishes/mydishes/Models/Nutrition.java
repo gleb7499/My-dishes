@@ -1,5 +1,8 @@
 package com.mydishes.mydishes.Models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import androidx.annotation.NonNull;
 
 import org.jetbrains.annotations.Contract;
@@ -8,7 +11,8 @@ import java.util.List;
 import java.util.Objects;
 
 // Класс-модель представления КБЖУ блюда/продукта
-public class Nutrition implements Cloneable { // Added implements Cloneable
+public class Nutrition implements Cloneable, Parcelable { // Added implements Parcelable
+    private long id; // ID
     private double calories; // ккалории
     private double protein; // белки
     private double fat; // жиры
@@ -23,6 +27,34 @@ public class Nutrition implements Cloneable { // Added implements Cloneable
 
     public Nutrition() {
         // Empty constructor!
+    }
+
+    public static final Creator<Nutrition> CREATOR = new Creator<>() {
+        @Override
+        public Nutrition createFromParcel(Parcel in) {
+            return new Nutrition(in);
+        }
+
+        @Override
+        public Nutrition[] newArray(int size) {
+            return new Nutrition[size];
+        }
+    };
+
+    protected Nutrition(Parcel in) {
+        id = in.readLong();
+        calories = in.readDouble();
+        protein = in.readDouble();
+        fat = in.readDouble();
+        carb = in.readDouble();
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public double getCalories() {
@@ -60,7 +92,7 @@ public class Nutrition implements Cloneable { // Added implements Cloneable
     // Вычисляет итоговое значение КБЖУ для блюда по списку продуктов
     @NonNull
     @Contract("_ -> new")
-    public static Nutrition calculate(@NonNull List<Product> products) {
+    public static Nutrition calculate(@NonNull final List<Product> products) {
         if (products.isEmpty()) {
             throw new IllegalArgumentException("Список продуктов не может быть пустым");
         }
@@ -138,5 +170,19 @@ public class Nutrition implements Cloneable { // Added implements Cloneable
             // This should not happen since we are Cloneable
             throw new AssertionError();
         }
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeLong(id);
+        dest.writeDouble(calories);
+        dest.writeDouble(protein);
+        dest.writeDouble(fat);
+        dest.writeDouble(carb);
     }
 }

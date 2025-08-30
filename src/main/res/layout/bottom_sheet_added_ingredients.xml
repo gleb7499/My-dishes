@@ -16,7 +16,7 @@
 
     <!-- Title -->
     <TextView
-        android:id="@+id/selected_products_title"
+        android:id="@+id/bottom_sheet_added_ingredients_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -26,7 +26,7 @@
 
     <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/selected_products_recycler"
+        android:id="@+id/bottom_sheet_added_ingredients_recycler"
         android:layout_width="match_parent"
         android:layout_height="450dp"
         android:layout_marginBottom="12dp"

@@ -6,6 +6,9 @@ import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
+/**
+ * Представляет продукт в базе данных.
+ */
 @Entity(tableName = "products",
         foreignKeys = @ForeignKey(entity = Nutrition.class,
                 parentColumns = "id",
@@ -25,11 +28,21 @@ public class Product {
 
     public float mass;       // масса продукта
 
-    // Пустой конструктор для Room
+    /**
+     * Пустой конструктор для Room.
+     */
     public Product() {
     }
 
-    // Конструктор для удобства (без ID, так как он autoGenerate)
+    /**
+     * Конструктор для создания объекта Product.
+     *
+     * @param productURL  URL страницы продукта.
+     * @param imageURL    URL изображения продукта.
+     * @param name        Название продукта.
+     * @param nutritionId Идентификатор пищевой ценности.
+     * @param mass        Масса продукта.
+     */
     public Product(String productURL, String imageURL, String name, long nutritionId, float mass) {
         this.productURL = productURL;
         this.imageURL = imageURL;

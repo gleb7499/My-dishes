@@ -36,7 +36,7 @@
         tools:text="Очень Длинное Название Блюда в Несколько Строк Чтобы Проверить Перенос" />
 
     <TextView
-        android:id="@+id/bottom_sheet_ingredients_title"
+        android:id="@+id/bottom_sheet_dish_details_ingredients_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -47,7 +47,7 @@
 
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/bottom_sheet_ingredients_recycler_view"
+        android:id="@+id/bottom_sheet_dish_details_ingredients_recycler"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"

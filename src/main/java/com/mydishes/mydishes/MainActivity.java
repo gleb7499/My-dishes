@@ -2,11 +2,8 @@ package com.mydishes.mydishes;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -18,211 +15,220 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.mydishes.mydishes.Adapters.DishesAdapter;
-import com.mydishes.mydishes.Adapters.IngredientsAdapter;
 import com.mydishes.mydishes.Database.repository.DataRepository;
 import com.mydishes.mydishes.Models.Dish;
-import com.mydishes.mydishes.Models.Product;
-import com.mydishes.mydishes.Utils.DialogUtils;
+import com.mydishes.mydishes.Utils.DishDetailsBottomSheet;
 import com.mydishes.mydishes.Utils.ViewUtils;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-// Главное окно приложения (отображение списка созданных блюд)
+/**
+ * Главная активность приложения.
+ * Отображает список сохраненных блюд, позволяет добавлять новые блюда и удалять существующие.
+ * Использует {@link DishesAdapter} для отображения списка в {@link RecyclerView},
+ * {@link DataRepository} для взаимодействия с базой данных и {@link DishDetailsBottomSheet}
+ * для отображения и редактирования деталей блюда.
+ */
 public class MainActivity extends AppCompatActivity {
 
+    // Адаптер для RecyclerView, отображающего список блюд
     private DishesAdapter adapter;
+    // Репозиторий для доступа к данным блюд
     private DataRepository dataRepository;
+    // TextView для отображения сообщения об отсутствии блюд
     private TextView noDishesTextView;
 
+    /**
+     * Вызывается, когда активность становится видимой пользователю.
+     * В этом методе происходит загрузка (или перезагрузка) списка блюд из базы данных.
+     */
     @Override
     protected void onResume() {
         super.onResume();
+        // Загрузка блюд из базы данных при возобновлении активности
         loadDishesFromDb();
     }
 
+    /**
+     * Вызывается при создании активности.
+     * Инициализирует UI компоненты, настраивает RecyclerView, слушатели нажатий и свайпов,
+     * а также получает экземпляр DataRepository.
+     *
+     * @param savedInstanceState Если активность пересоздается после предыдущего уничтожения,
+     *                           этот Bundle содержит данные, которые она в последний раз предоставила
+     *                           в {@link #onSaveInstanceState}. В противном случае это null.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Настройка активити
+        // Включение отображения "от края до края" для современного вида
         EdgeToEdge.enable(this);
+        // Установка прозрачного цвета для навигационной панели и строки состояния
         getWindow().setNavigationBarColor(android.graphics.Color.TRANSPARENT);
         getWindow().setStatusBarColor(android.graphics.Color.TRANSPARENT);
+        // Установка макета для этой активности
         setContentView(R.layout.activity_main);
 
-        LinearLayout linear_layout = findViewById(R.id.linear_layout);
-        ViewUtils.applyInsets(linear_layout, true, false, false, true);
-        RecyclerView recyclerView = findViewById(R.id.add_products_recycler); // Присваиваем полю класса
+        // Получение корневого LinearLayout и применение системных отступов
+        LinearLayout linearLayout = findViewById(R.id.linear_layout);
+        ViewUtils.applyInsets(linearLayout, true, false, false, true);
+
+        // Инициализация RecyclerView
+        RecyclerView recyclerView = findViewById(R.id.add_products_recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 
-        // обработка нажатия на элемент списка
+        // Инициализация адаптера и установка слушателя нажатия на элемент списка
         adapter = new DishesAdapter(dish -> {
+            // Проверка, что объект блюда не null
             if (dish == null) return;
 
-            // копия текущего элемента, на который нажали, чтобы предотвратить мутабельность
-            Dish newDish = dish.clone();
+            // Создание копии объекта Dish для передачи в BottomSheet, чтобы избежать изменения оригинала
+            Dish dishCopy = dish.clone();
 
-            // нижний лист для отображения информации о блюде (фото, наименование, список ингредиентов)
-            BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(MainActivity.this);
-            View bottomSheetView = LayoutInflater.from(MainActivity.this).inflate(
-                    R.layout.bottom_sheet_dish_details,
-                    findViewById(R.id.bottom_sheet_dish_details_container),
-                    false
-            );
-            bottomSheetDialog.setContentView(bottomSheetView);
-            // Устанавливаем режим обработки появления клавиатуры
-            if (bottomSheetDialog.getWindow() != null) {
-                bottomSheetDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
-            }
-
-            // элементы нижнего листа
-            ImageView dishImage = bottomSheetView.findViewById(R.id.bottom_sheet_dish_image);
-            TextView dishNameTextView = bottomSheetView.findViewById(R.id.bottom_sheet_dish_name);
-            RecyclerView ingredientsRecyclerView = bottomSheetView.findViewById(R.id.bottom_sheet_ingredients_recycler_view);
-            TextView ingredientsTitleTextView = bottomSheetView.findViewById(R.id.bottom_sheet_ingredients_title);
-
-            // устанавливаем название блюда
-            dishNameTextView.setText(newDish.getName());
-
-            // обработка нажатия на название блюда
-            dishNameTextView.setOnClickListener(v -> DialogUtils.showEditDishNameDialog(MainActivity.this, newDish.getName(), newName -> {
-                // Обновляем имя в объекте Dish
-                newDish.setName(newName);
-
-                // Вызываем метод репозитория для обновления блюда в БД
-                dataRepository.updateDish(MainActivity.this, newDish, new DataRepository.QueryCallBack<>() {
-                    @Override
-                    public void onSuccess(Void result) {
-                        // Обновляем текст в TextView
-                        dishNameTextView.setText(newName);
-                        loadDishesFromDb(); // Обновляем список после успешного обновления имени
-                    }
-
-                    @Override
-                    public void onError(Exception e) {
-                        Snackbar.make(bottomSheetView, getString(R.string.error_update_name_dish) + ": " + e.getMessage(), Snackbar.LENGTH_LONG).show();
-                    }
-                });
-            }));
-
-            // устанавливаем фото блюда
-            Glide.with(MainActivity.this)
-                    .load(newDish.getPhotoUri())
-                    .placeholder(R.drawable.placeholder)
-                    .error(R.drawable.error_image)
-                    .into(dishImage);
-
-            // устанавливаем список продуктов (ингредиентов) в recycler view
-            List<Product> ingredients = newDish.getProducts();
-            if (ingredients != null && !ingredients.isEmpty()) {
-                ingredientsTitleTextView.setVisibility(View.VISIBLE);
-                ingredientsRecyclerView.setVisibility(View.VISIBLE);
-                IngredientsAdapter ingredientsAdapter = new IngredientsAdapter();
-                ingredientsRecyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-                ingredientsRecyclerView.setAdapter(ingredientsAdapter);
-                ingredientsAdapter.submitList(new ArrayList<>(ingredients));
-            } else {
-                ingredientsTitleTextView.setVisibility(View.GONE);
-                ingredientsRecyclerView.setVisibility(View.GONE);
-            }
-
-            bottomSheetDialog.show();
+            // Создание и отображение DishDetailsBottomSheet для просмотра/редактирования деталей блюда
+            DishDetailsBottomSheet bottomSheet = new DishDetailsBottomSheet(dishCopy);
+            bottomSheet.show(getSupportFragmentManager(), bottomSheet.getTag());
         });
 
-        // установка адаптера
+        // Установка слушателя для получения результата от DishDetailsBottomSheet
+        // (например, если блюдо было обновлено)
+        getSupportFragmentManager().setFragmentResultListener(DishDetailsBottomSheet.REQUEST_KEY, this, (requestKey, bundle) -> {
+            boolean dishUpdated = bundle.getBoolean(DishDetailsBottomSheet.BUNDLE_KEY_DISH_UPDATED);
+            // Если блюдо было обновлено, перезагружаем список
+            if (dishUpdated) {
+                loadDishesFromDb();
+            }
+        });
+
+        // Установка адаптера для RecyclerView
         recyclerView.setAdapter(adapter);
 
-        // обработка свайпа по элементу списка
+        // Настройка обработки свайпов для удаления элементов
         ItemTouchHelper itemTouchHelper = getItemTouchHelper();
         itemTouchHelper.attachToRecyclerView(recyclerView);
 
-        // кнопка добавления нового блюда
+        // Настройка кнопки добавления нового блюда
         ImageButton addButton = findViewById(R.id.addButton);
-        addButton.setOnClickListener(this::startAddActivity);
+        addButton.setOnClickListener(this::startAddActivity); // Вызов метода startAddActivity при нажатии
 
-        // элемент для сообщения об  отсутствии блюд в БД
+        // Инициализация TextView для сообщения об отсутствии блюд
         noDishesTextView = findViewById(R.id.emptyStateText);
 
-        // объект для работы с БД
+        // Получение экземпляра DataRepository для работы с базой данных
         dataRepository = DataRepository.getInstance(getApplication());
     }
 
 
-    // получаем экземпляр ItemTouchHelper для обработки свайпа и его действий
+    /**
+     * Создает и настраивает {@link ItemTouchHelper.SimpleCallback} для обработки свайпов по элементам RecyclerView.
+     * Позволяет удалять блюда свайпом влево или вправо с диалогом подтверждения.
+     *
+     * @return Настроенный экземпляр {@link ItemTouchHelper}.
+     */
     @NonNull
     private ItemTouchHelper getItemTouchHelper() {
+        // Создание SimpleCallback для обработки свайпов
         ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                return false;  // Для перетаскивания (drag&drop). Если не нужно — возвращаем false
+                // Перемещение элементов не поддерживается, возвращаем false
+                return false;
             }
 
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                // Получение позиции элемента, по которому был сделан свайп
                 final int position = viewHolder.getAdapterPosition();
+                // Проверка валидности позиции
                 if (position == RecyclerView.NO_POSITION || position >= adapter.getCurrentList().size()) {
-                    return; // Проверка валидности позиции
+                    return;
                 }
+                // Получение объекта Dish, соответствующего свайпнутому элементу
                 final Dish dish = adapter.getCurrentList().get(position);
 
+                // Создание диалога подтверждения удаления
                 AlertDialog alertDialog = new MaterialAlertDialogBuilder(MainActivity.this)
-                        .setTitle(R.string.delete)
-                        .setMessage(getString(R.string.delete_dish_confirmation, dish.getName())) // Используем форматированную строку для подтверждения
-                        .setNegativeButton(R.string.cancel, (d, w) -> {
-                            d.dismiss();
-                            adapter.notifyItemChanged(position); // Возвращаем элемент на место
+                        .setTitle(R.string.delete) // Заголовок "Удалить"
+                        .setMessage(getString(R.string.delete_confirmation, dish.getName())) // Сообщение "Вы уверены, что хотите удалить [Название блюда]?"
+                        .setNegativeButton(R.string.cancel, (dialog, which) -> {
+                            // При отмене возвращаем элемент на место (отменяем визуальное удаление)
+                            dialog.dismiss();
+                            adapter.notifyItemChanged(position);
                         })
-                        .setPositiveButton(R.string.ok, (dialog, which) -> dataRepository.deleteDishById(MainActivity.this, dish.getId(), new DataRepository.QueryCallBack<>() {
-                            @Override
-                            public void onSuccess(Void result) {
-                                loadDishesFromDb(); // Обновляем список после успешного удаления
-                            }
+                        .setPositiveButton(R.string.ok, (dialog, which) ->
+                                // При подтверждении удаляем блюдо из базы данных
+                                dataRepository.deleteDishById(MainActivity.this, dish.getId(), new DataRepository.QueryCallBack<>() {
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        // При успешном удалении перезагружаем список блюд
+                                        loadDishesFromDb();
+                                    }
 
-                            @Override
-                            public void onError(Exception e) {
-                                Snackbar.make(findViewById(android.R.id.content), getString(R.string.error_deleting_dish) + e.getMessage(), Snackbar.LENGTH_LONG).show();
-                                adapter.notifyItemChanged(position); // Возвращаем элемент на место в случае ошибки
-                            }
-                        })).create();
+                                    @Override
+                                    public void onError(Exception e) {
+                                        // При ошибке удаления показываем Snackbar и возвращаем элемент на место
+                                        Snackbar.make(findViewById(android.R.id.content), getString(R.string.error_deleting) + e.getMessage(), Snackbar.LENGTH_LONG).show();
+                                        adapter.notifyItemChanged(position);
+                                    }
+                                })
+                        ).create();
+                // Отображение диалога
                 alertDialog.show();
             }
         };
-
-        // привязываем свайп к RecyclerView
+        // Создание и возврат ItemTouchHelper с настроенным SimpleCallback
         return new ItemTouchHelper(simpleCallback);
     }
 
 
-    // загрузка всей информации о всех блюдах из БД
+    /**
+     * Загружает список всех блюд с их полной детализацией из базы данных.
+     * Использует {@link DataRepository#getAllDishesWithDetails}.
+     * В случае успеха обновляет адаптер RecyclerView, отображая блюда (новые сверху).
+     * В случае ошибки отображает Snackbar с сообщением.
+     * Также управляет видимостью {@link #noDishesTextView} в зависимости от того, пуст ли список.
+     */
     private void loadDishesFromDb() {
+        // Асинхронный запрос к репозиторию для получения всех блюд с деталями
         dataRepository.getAllDishesWithDetails(this, new DataRepository.QueryCallBack<>() {
             @Override
             public void onSuccess(List<Dish> result) {
-                if (adapter != null) { // Добавлена проверка на null для adapter
-                    Collections.reverse(result); // Разворачиваем список (новые сверху)
+                // Проверка, что адаптер еще существует (активность/фрагмент не уничтожены)
+                if (adapter != null) {
+                    // Разворачиваем список, чтобы новые блюда были сверху
+                    Collections.reverse(result);
+                    // Передаем обновленный список в адаптер
                     adapter.submitList(result);
+                    // Управляем видимостью текстового поля "Нет блюд":
+                    // показываем, если список пуст, иначе скрываем
                     noDishesTextView.setVisibility(result.isEmpty() ? View.VISIBLE : View.GONE);
                 }
             }
 
             @Override
             public void onError(Exception e) {
+                // При ошибке загрузки показываем Snackbar с сообщением
                 Snackbar.make(findViewById(android.R.id.content), getString(R.string.error_loading_dishes) + " " + e.getMessage(), Snackbar.LENGTH_LONG).show();
             }
         });
     }
 
 
-    // активити для добавления нового блюда
+    /**
+     * Запускает {@link AddActivity} для добавления нового блюда.
+     * Вызывается при нажатии на кнопку добавления.
+     *
+     * @param v View, инициировавшая вызов (кнопка добавления).
+     */
     private void startAddActivity(View v) {
+        // Создание Intent для запуска AddActivity
         Intent intent = new Intent(this, AddActivity.class);
+        // Запуск активности
         startActivity(intent);
     }
 }
