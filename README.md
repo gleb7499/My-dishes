@@ -30,7 +30,7 @@
 <div align="center">
 
 <table>
-  <tr>
+  <tr style="padding:25px">
     <td align="center">
       <b>1️⃣ Экран со списком блюд</b><br>
       <img src="images/1.jpg" alt="Список блюд" width="300"/>
@@ -40,7 +40,7 @@
       <img src="images/2.jpg" alt="Детали блюда" width="300"/>
     </td>
   </tr>
-  <tr>
+  <tr style="padding:25px">
     <td align="center">
       <b>3️⃣ Поиск ингредиента</b><br>
       <img src="images/3.jpg" alt="Поиск ингредиента" width="300"/>
@@ -50,7 +50,7 @@
       <img src="images/4.jpg" alt="Формирование блюда" width="300"/>
     </td>
   </tr>
-  <tr>
+  <tr style="padding:25px">
     <td align="center">
       <b>5️⃣ Добавление фото блюда</b><br>
       <img src="images/5.jpg" alt="Добавление фото" width="300"/>
@@ -60,7 +60,7 @@
       <img src="images/6.jpg" alt="Ввод названия" width="300"/>
     </td>
   </tr>
-  <tr>
+  <tr style="padding:25px">
     <td align="center">
       <b>7️⃣ Обновлённый список блюд</b><br>
       <img src="images/7.jpg" alt="Обновлённый список" width="300"/>
@@ -73,6 +73,7 @@
 </table>
 
 </div>
+
 
 ## 🛠️ Архитектура и используемые технологии
 
