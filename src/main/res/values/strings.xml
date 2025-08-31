@@ -83,4 +83,9 @@
     <string name="added_ingredients_willnt_be_saved">Добавленные ингредиенты не будут сохранены!</string>
     <string name="error_deleting_product_in_dish">Блюдо должно содержать как минимум один продукт!</string>
     <string name="error_update_product">Ошибка обновления продукта!</string>
+    <string name="error_persisting_image_permission">Не удалось получить постоянное разрешение для изображения. Изображение может быть недоступно позже</string>
+    <string name="set_dish_photo_title">Установить фото на блюдо?</string>
+    <string name="set_dish_photo_message">Хотите добавить фотографию к этому блюду?</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
 </resources>
