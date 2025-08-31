@@ -61,9 +61,13 @@
     </td>
   </tr>
   <tr>
-    <td align="center" colspan="2">
+    <td align="center">
       <b>7️⃣ Обновлённый список блюд</b><br>
       <img src="images/7.jpg" alt="Обновлённый список" width="300"/>
+    </td>
+    <td align="center">
+      <b>8️⃣ Интерфейс в светлой теме</b><br>
+      <img src="images/8.jpg" alt="Светлая тема" width="300"/>
     </td>
   </tr>
 </table>
