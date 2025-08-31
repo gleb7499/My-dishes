@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -118,8 +119,11 @@ public class ProductFindAdapter extends BaseAdapter<Product, ProductFindAdapter.
 
                     @Override
                     public void onError(Exception e) {
-                        // Отображение Snackbar с сообщением об ошибке парсинга
-                        Snackbar.make(holder.itemView, "Ошибка парсинга: " + e.getMessage(), Snackbar.LENGTH_LONG).show();
+                        Snackbar snackbar = Snackbar.make(holder.itemView, "Ошибка парсинга: " + e.getMessage(), Snackbar.LENGTH_LONG);
+                        View snackbarView = snackbar.getView();
+                        TextView textView = snackbarView.findViewById(com.google.android.material.R.id.snackbar_text);
+                        textView.setTextColor(ContextCompat.getColor(context, android.R.color.holo_red_dark));
+                        snackbar.show();
                     }
 
                     @Override
