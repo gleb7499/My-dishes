@@ -1,4 +1,4 @@
-package com.mydishes.mydishes.Database.repository;
+package com.mydishes.mydishes.database.repository;
 
 import android.app.Activity;
 import android.content.Context;
@@ -6,16 +6,16 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.mydishes.mydishes.Database.AppDatabase;
-import com.mydishes.mydishes.Database.dao.DishDao;
-import com.mydishes.mydishes.Database.dao.NutritionDao;
-import com.mydishes.mydishes.Database.dao.ProductDao;
-import com.mydishes.mydishes.Database.model.Dish;
-import com.mydishes.mydishes.Database.model.DishProductCrossRef;
-import com.mydishes.mydishes.Database.model.Nutrition;
-import com.mydishes.mydishes.Database.model.Product;
-import com.mydishes.mydishes.Database.model.relations.DishWithProductsAndNutrition;
-import com.mydishes.mydishes.Database.model.relations.ProductWithNutrition;
+import com.mydishes.mydishes.database.AppDatabase;
+import com.mydishes.mydishes.database.dao.DishDao;
+import com.mydishes.mydishes.database.dao.NutritionDao;
+import com.mydishes.mydishes.database.dao.ProductDao;
+import com.mydishes.mydishes.database.model.Dish;
+import com.mydishes.mydishes.database.model.DishProductCrossRef;
+import com.mydishes.mydishes.database.model.Nutrition;
+import com.mydishes.mydishes.database.model.Product;
+import com.mydishes.mydishes.database.model.relations.DishWithProductsAndNutrition;
+import com.mydishes.mydishes.database.model.relations.ProductWithNutrition;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -79,15 +79,15 @@ public class DataRepository {
 
     /**
      * Конвертирует объект {@link ProductWithNutrition} (связь продукта и его пищевой ценности из БД)
-     * в объект модели {@link com.mydishes.mydishes.Models.Product}, используемый в приложении.
+     * в объект модели {@link com.mydishes.mydishes.models.Product}, используемый в приложении.
      *
      * @param pwn Объект {@link ProductWithNutrition}, содержащий данные продукта и его пищевой ценности из БД.
-     * @return Адаптированный объект {@link com.mydishes.mydishes.Models.Product} для использования в UI или бизнес-логике.
+     * @return Адаптированный объект {@link com.mydishes.mydishes.models.Product} для использования в UI или бизнес-логике.
      */
     @NonNull
-    private static com.mydishes.mydishes.Models.Product getProduct(@NonNull ProductWithNutrition pwn) {
+    private static com.mydishes.mydishes.models.Product getProduct(@NonNull ProductWithNutrition pwn) {
         // Создание нового объекта модели Product
-        com.mydishes.mydishes.Models.Product appProduct = new com.mydishes.mydishes.Models.Product();
+        com.mydishes.mydishes.models.Product appProduct = new com.mydishes.mydishes.models.Product();
         // Копирование основных данных продукта
         appProduct.setId(pwn.product.id);
         appProduct.setName(pwn.product.name);
@@ -98,7 +98,7 @@ public class DataRepository {
         // Проверка наличия данных о пищевой ценности
         if (pwn.nutrition != null) {
             // Создание и заполнение объекта модели Nutrition
-            com.mydishes.mydishes.Models.Nutrition productNutrition = new com.mydishes.mydishes.Models.Nutrition();
+            com.mydishes.mydishes.models.Nutrition productNutrition = new com.mydishes.mydishes.models.Nutrition();
             productNutrition.setCalories(pwn.nutrition.calories);
             productNutrition.setProtein(pwn.nutrition.protein);
             productNutrition.setFat(pwn.nutrition.fat);
@@ -110,13 +110,13 @@ public class DataRepository {
     }
 
     /**
-     * Адаптирует объект модели {@link com.mydishes.mydishes.Models.Nutrition} (используемый в приложении)
+     * Адаптирует объект модели {@link com.mydishes.mydishes.models.Nutrition} (используемый в приложении)
      * к сущности {@link Nutrition} (используемой в базе данных).
      *
-     * @param originalNutrition Оригинальный объект {@link com.mydishes.mydishes.Models.Nutrition} из модели приложения.
+     * @param originalNutrition Оригинальный объект {@link com.mydishes.mydishes.models.Nutrition} из модели приложения.
      * @return Сущность {@link Nutrition}, готовая для сохранения в базу данных, или null, если originalNutrition равен null.
      */
-    private Nutrition adaptNutrition(com.mydishes.mydishes.Models.Nutrition originalNutrition) {
+    private Nutrition adaptNutrition(com.mydishes.mydishes.models.Nutrition originalNutrition) {
         // Проверка на null
         if (originalNutrition == null) return null;
         // Создание и возврат сущности Nutrition для БД
@@ -129,14 +129,14 @@ public class DataRepository {
     }
 
     /**
-     * Адаптирует объект модели {@link com.mydishes.mydishes.Models.Product} (используемый в приложении)
+     * Адаптирует объект модели {@link com.mydishes.mydishes.models.Product} (используемый в приложении)
      * к сущности {@link Product} (используемой в базе данных).
      *
-     * @param originalProduct Оригинальный объект {@link com.mydishes.mydishes.Models.Product} из модели приложения.
+     * @param originalProduct Оригинальный объект {@link com.mydishes.mydishes.models.Product} из модели приложения.
      * @param nutritionId     ID связанной пищевой ценности в таблице Nutrition базы данных.
      * @return Сущность {@link Product}, готовая для сохранения в базу данных, или null, если originalProduct равен null.
      */
-    private Product adaptProduct(com.mydishes.mydishes.Models.Product originalProduct, long nutritionId) {
+    private Product adaptProduct(com.mydishes.mydishes.models.Product originalProduct, long nutritionId) {
         // Проверка на null
         if (originalProduct == null) return null;
         // Создание и возврат сущности Product для БД
@@ -155,10 +155,10 @@ public class DataRepository {
      * Результат операции (ID вставленного блюда или ошибка) передается через {@link QueryCallBack}.
      *
      * @param activity       Активность, из которой вызывается метод, для выполнения UI операций в основном потоке.
-     * @param originalDish   Объект {@link com.mydishes.mydishes.Models.Dish}, содержащий данные нового блюда.
+     * @param originalDish   Объект {@link com.mydishes.mydishes.models.Dish}, содержащий данные нового блюда.
      * @param queryCallBack  Колбэк для получения результата операции.
      */
-    public void insertDishWithDetails(Activity activity, com.mydishes.mydishes.Models.Dish originalDish, QueryCallBack<Long> queryCallBack) {
+    public void insertDishWithDetails(Activity activity, com.mydishes.mydishes.models.Dish originalDish, QueryCallBack<Long> queryCallBack) {
         // Создание нового потока для выполнения операции
         new Thread(() -> {
             try {
@@ -178,7 +178,7 @@ public class DataRepository {
                     // Шаг 3: Обработка продуктов, если они есть
                     if (originalDish.getProducts() != null) {
                         List<DishProductCrossRef> crossRefs = new ArrayList<>();
-                        for (com.mydishes.mydishes.Models.Product originalProduct : originalDish.getProducts()) {
+                        for (com.mydishes.mydishes.models.Product originalProduct : originalDish.getProducts()) {
                             // Шаг 3.1: Адаптация и сохранение пищевой ценности текущего продукта
                             Nutrition productNutritionEntity = adaptNutrition(originalProduct.getNutrition());
                             long productNutritionId = 0;
@@ -207,6 +207,7 @@ public class DataRepository {
                 // Логгирование ошибки и передача ее в основной поток
                 Log.e(TAG, "Ошибка при вставке блюда: ", e);
                 activity.runOnUiThread(() -> queryCallBack.onError(e));
+                Thread.currentThread().interrupt();
             }
         }).start();
     }
@@ -214,14 +215,14 @@ public class DataRepository {
     /**
      * Получает блюдо по его идентификатору (ID) вместе со всей связанной информацией:
      * пищевая ценность самого блюда, список продуктов, входящих в блюдо, и пищевая ценность каждого продукта.
-     * Адаптирует результат из сущностей БД к модели {@link com.mydishes.mydishes.Models.Dish}.
+     * Адаптирует результат из сущностей БД к модели {@link com.mydishes.mydishes.models.Dish}.
      * Операция выполняется асинхронно.
      *
      * @param dishId ID запрашиваемого блюда.
-     * @return {@link Future}, который по завершении будет содержать объект {@link com.mydishes.mydishes.Models.Dish}
+     * @return {@link Future}, который по завершении будет содержать объект {@link com.mydishes.mydishes.models.Dish}
      *         или null, если блюдо с таким ID не найдено.
      */
-    public Future<com.mydishes.mydishes.Models.Dish> getDishById(long dishId) {
+    public Future<com.mydishes.mydishes.models.Dish> getDishById(long dishId) {
         // Выполнение запроса в фоновом потоке
         return executorService.submit(() -> {
             // Получение сырых данных из DAO
@@ -232,7 +233,7 @@ public class DataRepository {
             }
 
             // Создание объекта модели Dish для результата
-            com.mydishes.mydishes.Models.Dish resultDish = new com.mydishes.mydishes.Models.Dish();
+            com.mydishes.mydishes.models.Dish resultDish = new com.mydishes.mydishes.models.Dish();
             // Копирование основных данных блюда
             resultDish.setId(dishDetails.dish.id); // Установка ID блюда
             resultDish.setName(dishDetails.dish.name);
@@ -240,7 +241,7 @@ public class DataRepository {
 
             // Обработка пищевой ценности блюда
             if (dishDetails.dishNutrition != null) {
-                com.mydishes.mydishes.Models.Nutrition mainNutrition = new com.mydishes.mydishes.Models.Nutrition();
+                com.mydishes.mydishes.models.Nutrition mainNutrition = new com.mydishes.mydishes.models.Nutrition();
                 mainNutrition.setId(dishDetails.dishNutrition.id); // Установка ID пищевой ценности
                 mainNutrition.setCalories(dishDetails.dishNutrition.calories);
                 mainNutrition.setProtein(dishDetails.dishNutrition.protein);
@@ -251,7 +252,7 @@ public class DataRepository {
 
             // Обработка списка продуктов блюда
             if (dishDetails.products != null && !dishDetails.products.isEmpty()) {
-                List<com.mydishes.mydishes.Models.Product> resultProducts = new ArrayList<>();
+                List<com.mydishes.mydishes.models.Product> resultProducts = new ArrayList<>();
                 // Сбор ID всех продуктов для эффективного запроса их пищевой ценности
                 List<Long> productIds = dishDetails.products.stream().map(p -> p.id).collect(Collectors.toList());
 
@@ -266,7 +267,7 @@ public class DataRepository {
                 for (Product dbProduct : dishDetails.products) {
                     ProductWithNutrition pwn = productMap.get(dbProduct.id);
                     if (pwn != null) {
-                        com.mydishes.mydishes.Models.Product appProduct = getProduct(pwn); // Использование вспомогательного метода
+                        com.mydishes.mydishes.models.Product appProduct = getProduct(pwn); // Использование вспомогательного метода
                         resultProducts.add(appProduct);
                     }
                 }
@@ -282,18 +283,18 @@ public class DataRepository {
      * что делает его более эффективным для отображения в списках.
      * Операция выполняется асинхронно.
      *
-     * @return {@link Future} со списком объектов {@link com.mydishes.mydishes.Models.Dish},
+     * @return {@link Future} со списком объектов {@link com.mydishes.mydishes.models.Dish},
      *         содержащих только основную информацию.
      */
-    public Future<List<com.mydishes.mydishes.Models.Dish>> getAllDishesSimple() {
+    public Future<List<com.mydishes.mydishes.models.Dish>> getAllDishesSimple() {
         // Выполнение запроса в фоновом потоке
         return executorService.submit(() -> {
             // Получение списка сущностей Dish из DAO
             List<Dish> dbDishes = dishDao.getAllDishesSimple();
-            List<com.mydishes.mydishes.Models.Dish> resultDishes = new ArrayList<>();
+            List<com.mydishes.mydishes.models.Dish> resultDishes = new ArrayList<>();
             // Адаптация каждой сущности Dish к модели приложения
             for (Dish dbDish : dbDishes) {
-                com.mydishes.mydishes.Models.Dish appDish = new com.mydishes.mydishes.Models.Dish();
+                com.mydishes.mydishes.models.Dish appDish = new com.mydishes.mydishes.models.Dish();
                 appDish.setId(dbDish.id);
                 appDish.setName(dbDish.name);
                 appDish.setPhotoUri(dbDish.photoUri);
@@ -312,18 +313,19 @@ public class DataRepository {
      * @param activity      Активность для выполнения UI операций в основном потоке.
      * @param queryCallBack Колбэк для получения результата операции (списка блюд или ошибки).
      */
-    public void getAllDishesWithDetails(Activity activity, QueryCallBack<List<com.mydishes.mydishes.Models.Dish>> queryCallBack) {
+    public void getAllDishesWithDetails(Activity activity, QueryCallBack<List<com.mydishes.mydishes.models.Dish>> queryCallBack) {
         // Создание нового потока для выполнения операции
         new Thread(() -> {
             try {
                 // Получение данных с помощью приватного синхронного метода
-                List<com.mydishes.mydishes.Models.Dish> dishes = getAllDishesWithDetailsInternal();
+                List<com.mydishes.mydishes.models.Dish> dishes = getAllDishesWithDetailsInternal();
                 // Передача успешного результата в основной поток
                 activity.runOnUiThread(() -> queryCallBack.onSuccess(dishes));
             } catch (Exception e) {
                 // Логгирование ошибки и передача ее в основной поток
                 Log.e(TAG, "Ошибка при получении всех блюд с деталями: ", e);
                 activity.runOnUiThread(() -> queryCallBack.onError(e));
+                Thread.currentThread().interrupt();
             }
         }).start();
     }
@@ -332,16 +334,16 @@ public class DataRepository {
      * Внутренний метод для получения полного списка всех блюд с детализацией.
      * Выполняется синхронно в вызывающем потоке (предположительно, фоновом).
      *
-     * @return Список объектов {@link com.mydishes.mydishes.Models.Dish} со всеми деталями.
+     * @return Список объектов {@link com.mydishes.mydishes.models.Dish} со всеми деталями.
      * @throws ExecutionException   Если возникает ошибка во время выполнения задачи в ExecutorService.
      * @throws InterruptedException Если поток был прерван во время ожидания результата.
      */
-    private List<com.mydishes.mydishes.Models.Dish> getAllDishesWithDetailsInternal() throws ExecutionException, InterruptedException {
+    private List<com.mydishes.mydishes.models.Dish> getAllDishesWithDetailsInternal() throws ExecutionException, InterruptedException {
         // Выполнение запроса в фоновом потоке через ExecutorService
         return executorService.submit(() -> {
             // Получение всех блюд с продуктами и их пищевой ценностью из DAO
             List<DishWithProductsAndNutrition> allDbDishDetails = dishDao.getAllDishesWithProductsAndNutrition();
-            List<com.mydishes.mydishes.Models.Dish> resultAppDishes = new ArrayList<>();
+            List<com.mydishes.mydishes.models.Dish> resultAppDishes = new ArrayList<>();
 
             // Получение ID всех продуктов из всех блюд для одного пакетного запроса
             List<Long> allProductIds = allDbDishDetails.stream()
@@ -361,14 +363,14 @@ public class DataRepository {
 
             // Итерация по каждому блюду из БД и его адаптация
             for (DishWithProductsAndNutrition dishDetails : allDbDishDetails) {
-                com.mydishes.mydishes.Models.Dish resultDish = new com.mydishes.mydishes.Models.Dish();
+                com.mydishes.mydishes.models.Dish resultDish = new com.mydishes.mydishes.models.Dish();
                 resultDish.setId(dishDetails.dish.id);
                 resultDish.setName(dishDetails.dish.name);
                 resultDish.setPhotoUri(dishDetails.dish.photoUri);
 
                 // Адаптация пищевой ценности самого блюда
                 if (dishDetails.dishNutrition != null) {
-                    com.mydishes.mydishes.Models.Nutrition mainNutrition = new com.mydishes.mydishes.Models.Nutrition();
+                    com.mydishes.mydishes.models.Nutrition mainNutrition = new com.mydishes.mydishes.models.Nutrition();
                     mainNutrition.setId(dishDetails.dishNutrition.id);
                     mainNutrition.setCalories(dishDetails.dishNutrition.calories);
                     mainNutrition.setProtein(dishDetails.dishNutrition.protein);
@@ -379,12 +381,12 @@ public class DataRepository {
 
                 // Адаптация продуктов блюда
                 if (dishDetails.products != null && !dishDetails.products.isEmpty()) {
-                    List<com.mydishes.mydishes.Models.Product> resultProducts = new ArrayList<>();
+                    List<com.mydishes.mydishes.models.Product> resultProducts = new ArrayList<>();
                     for (Product dbProduct : dishDetails.products) {
                         ProductWithNutrition pwn = productNutritionMap.get(dbProduct.id);
                         if (pwn != null) {
                             // Использование вспомогательного метода getProduct для адаптации
-                            com.mydishes.mydishes.Models.Product appProduct = getProduct(pwn);
+                            com.mydishes.mydishes.models.Product appProduct = getProduct(pwn);
                             resultProducts.add(appProduct);
                         }
                     }
@@ -443,12 +445,12 @@ public class DataRepository {
      * Операция выполняется асинхронно.
      *
      * @param activity      Активность для выполнения UI операций (колбэков).
-     * @param dishToUpdate  Объект {@link com.mydishes.mydishes.Models.Dish} с обновленной информацией.
+     * @param dishToUpdate  Объект {@link com.mydishes.mydishes.models.Dish} с обновленной информацией.
      *                      Убедитесь, что ID блюда установлен корректно.
      * @param queryCallBack Колбэк для получения результата операции (успех или ошибка).
      *                      В случае успеха onSuccess будет вызван с null (Void).
      */
-    public void updateDish(Activity activity, com.mydishes.mydishes.Models.Dish dishToUpdate, QueryCallBack<Void> queryCallBack) {
+    public void updateDish(Activity activity, com.mydishes.mydishes.models.Dish dishToUpdate, QueryCallBack<Void> queryCallBack) {
         // Запуск операции в новом потоке
         new Thread(() -> {
             try {
@@ -463,13 +465,13 @@ public class DataRepository {
                     // Шаг 0: Получение текущего состояния блюда для определения ID существующих Nutrition
                     DishWithProductsAndNutrition existingDishContainer = dishDao.getDishWithProductsAndNutrition(dishId);
                     if (existingDishContainer == null || existingDishContainer.dish == null) {
-                        throw new RuntimeException("Блюдо с ID " + dishId + " не найдено для обновления.");
+                        throw new IllegalArgumentException("Блюдо с ID " + dishId + " не найдено для обновления.");
                     }
                     long oldDishNutritionId = existingDishContainer.dish.nutritionId;
 
                     // Шаг 1: Обновление или вставка пищевой ценности самого блюда
                     long finalDishNutritionFk;
-                    com.mydishes.mydishes.Models.Nutrition appDishNutrition = dishToUpdate.getNutrition();
+                    com.mydishes.mydishes.models.Nutrition appDishNutrition = dishToUpdate.getNutrition();
                     if (appDishNutrition != null) {
                         Nutrition dbDishNutritionEntity = adaptNutrition(appDishNutrition);
                         if (appDishNutrition.getId() != 0) { // Если у модели Nutrition есть ID, обновляем существующую
@@ -504,11 +506,11 @@ public class DataRepository {
 
                     if (dishToUpdate.getProducts() != null && !dishToUpdate.getProducts().isEmpty()) {
                         List<DishProductCrossRef> newCrossRefs = new ArrayList<>();
-                        for (com.mydishes.mydishes.Models.Product appProduct : dishToUpdate.getProducts()) {
+                        for (com.mydishes.mydishes.models.Product appProduct : dishToUpdate.getProducts()) {
                             long productNutritionFk = 0;
 
                             // Шаг 3а: Обновление/вставка пищевой ценности продукта
-                            com.mydishes.mydishes.Models.Nutrition appProductNutrition = appProduct.getNutrition();
+                            com.mydishes.mydishes.models.Nutrition appProductNutrition = appProduct.getNutrition();
                             if (appProductNutrition != null) {
                                 Nutrition dbProductNutritionEntity = adaptNutrition(appProductNutrition);
                                 if (appProductNutrition.getId() != 0) { // Обновляем существующую Nutrition продукта
@@ -552,6 +554,7 @@ public class DataRepository {
                 // Логгирование ошибки и передача ее в основной поток
                 Log.e(TAG, "Ошибка при обновлении блюда с ID: " + (dishToUpdate != null ? dishToUpdate.getId() : "null"), e);
                 activity.runOnUiThread(() -> queryCallBack.onError(e));
+                Thread.currentThread().interrupt();
             }
         }).start();
     }

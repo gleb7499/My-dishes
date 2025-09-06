@@ -16,12 +16,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
-import com.mydishes.mydishes.Adapters.DishesAdapter;
-import com.mydishes.mydishes.Database.repository.DataRepository;
-import com.mydishes.mydishes.Models.Dish;
-import com.mydishes.mydishes.Utils.DishDetailsBottomSheet;
-import com.mydishes.mydishes.Utils.ViewUtils;
+import com.mydishes.mydishes.adapters.DishesAdapter;
+import com.mydishes.mydishes.database.repository.DataRepository;
+import com.mydishes.mydishes.models.Dish;
+import com.mydishes.mydishes.utils.DishDetailsBottomSheet;
+import com.mydishes.mydishes.utils.ViewUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -88,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
             if (dish == null) return;
 
             // Создание копии объекта Dish для передачи в BottomSheet, чтобы избежать изменения оригинала
-            Dish dishCopy = dish.clone();
+            Dish dishCopy = Dish.createDish(dish);
 
             // Создание и отображение DishDetailsBottomSheet для просмотра/редактирования деталей блюда
             DishDetailsBottomSheet bottomSheet = new DishDetailsBottomSheet(dishCopy);
@@ -172,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
                                     @Override
                                     public void onError(Exception e) {
                                         // При ошибке удаления показываем Snackbar и возвращаем элемент на место
-                                        Snackbar.make(findViewById(android.R.id.content), getString(R.string.error_deleting) + e.getMessage(), Snackbar.LENGTH_LONG).show();
+                                        Snackbar.make(findViewById(android.R.id.content), getString(R.string.error_deleting) + e.getMessage(), BaseTransientBottomBar.LENGTH_LONG).show();
                                         adapter.notifyItemChanged(position);
                                     }
                                 })
@@ -213,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onError(Exception e) {
                 // При ошибке загрузки показываем Snackbar с сообщением
-                Snackbar.make(findViewById(android.R.id.content), getString(R.string.error_loading_dishes) + " " + e.getMessage(), Snackbar.LENGTH_LONG).show();
+                Snackbar.make(findViewById(android.R.id.content), getString(R.string.error_loading_dishes) + " " + e.getMessage(), BaseTransientBottomBar.LENGTH_LONG).show();
             }
         });
     }
