@@ -1,4 +1,6 @@
-# Java/Android Studio
+# =============================
+# Java / Android Studio
+# =============================
 *.iml
 .gradle/
 local.properties
@@ -7,26 +9,83 @@ local.properties
 !.idea/.gitignore
 !.idea/.name
 
+# =============================
 # MacOS
+# =============================
 .DS_Store
+.AppleDouble
+.LSOverride
 
+# =============================
 # Build directories
+# =============================
 /build/
-captures/
-.externalNativeBuild/
-.cxx/
+/captures/
+/.externalNativeBuild/
+/.cxx/
+/outputs/
+*/build/
 
+# =============================
 # Log files
+# =============================
 *.log
 
+# =============================
 # Gradle
+# =============================
 .gradle/
 build/
+!gradle-wrapper.jar
+!gradlew
+!gradlew.bat
 
+# =============================
 # Signing files
+# =============================
 *.jks
 *.keystore
 key.properties
 
-# Kotlin specific
+# =============================
+# Kotlin
+# =============================
 *.kotlin_module
+
+# =============================
+# APKs, AABs, Generated binaries
+# =============================
+*.apk
+*.ap_
+*.aab
+*.dex
+*.class
+*.jar
+*.so
+*.nar
+*.war
+*.ear
+*.iml
+*.hprof
+
+# =============================
+# Android Studio / IntelliJ
+# =============================
+.idea/
+*.iws
+*.ipr
+*.iml
+.gradle
+/build
+/captures
+.externalNativeBuild
+.cxx
+
+# =============================
+# OS Files
+# =============================
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*.swp
+*~.nib
