@@ -1,79 +1,79 @@
-# 🍲 MyDishes — Android-приложение для расчёта КБЖУ домашних блюд
+# 🍲 MyDishes — Android App for Tracking Macros of Homemade Dishes
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/gleb7499/My-dishes?label=APK&style=flat-square)](https://github.com/gleb7499/My-dishes/releases/latest/download/My.dishes-release.apk)
 ![Language](https://img.shields.io/badge/language-Java-orange?style=flat-square)
 ![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
 
-## 📌 Описание
+## 📌 Description
 
-**MyDishes** — это Android-приложение для подсчёта калорий, белков, жиров и углеводов (КБЖУ) в
-домашних блюдах.
-Главная цель проекта — не только создать рабочее приложение, но и выстроить архитектуру так, чтобы
-код был **поддерживаемым и расширяемым**.
+**MyDishes** is an Android app for calculating calories, protein, fat, and carbs (macros) in
+homemade dishes.
+The main goal of the project is not only to build a working app, but also to design the
+architecture so that the code is **maintainable and extensible**.
 
-## 📲 Скачать APK
+## 📲 Download APK
 
 [![Download](https://img.shields.io/badge/⬇️_Download-APK-blue?style=for-the-badge)](https://github.com/gleb7499/My-dishes/releases/latest/download/My.dishes-release.apk)
 
-## 🎯 Основной функционал
+## 🎯 Core Features
 
-* **Главный экран (MainActivity)** — список сохранённых блюд с фото, названием и автоматически
-  рассчитанными КБЖУ.
-* **Детали блюда (BottomSheet)** — фото, название, список ингредиентов.
+* **Home screen (MainActivity)** — a list of saved dishes with a photo, name, and automatically
+  calculated macros.
+* **Dish details (BottomSheet)** — photo, name, ingredient list.
 
-  * Изменение массы ингредиента → мгновенный пересчёт КБЖУ.
-  * Редактирование названия блюда → данные сохраняются сразу, без подтверждений.
-* **Добавление блюда (AddActivity)**:
+  * Changing an ingredient's weight → instant macro recalculation.
+  * Editing the dish name → data is saved immediately, with no confirmation dialogs.
+* **Adding a dish (AddActivity)**:
 
-  * Поиск ингредиентов через парсинг [Е-доставка](https://edostavka.by).
-  * Ввод массы через MaterialDialog.
-  * Автоматический парсинг страницы продукта с данными КБЖУ.
-  * Просмотр и редактирование выбранных ингредиентов.
-  * Установка фото блюда (галерея или камера).
-* **Работа с БД (Room/SQLite)**: сохранение всех данных в 3НФ.
-* **Удаление блюда или ингредиента свайпом** (ItemTouchHelper).
+  * Ingredient search by scraping [E-dostavka](https://edostavka.by).
+  * Weight input via MaterialDialog.
+  * Automatic product page scraping with macro data.
+  * Viewing and editing selected ingredients.
+  * Setting a dish photo (gallery or camera).
+* **Database (Room/SQLite)**: all data stored in 3NF.
+* **Swipe-to-delete** for dishes and ingredients (ItemTouchHelper).
 
-## 🖼️ Скриншоты
+## 🖼️ Screenshots
 
 <div align="center">
 
 <table>
   <tr>
     <td align="center">
-      <b>1️⃣ Экран со списком блюд</b><br>
-      <img src="images/1.jpg" alt="Список блюд" width="250"/>
+      <b>1️⃣ Dish list screen</b><br>
+      <img src="images/1.jpg" alt="Dish list" width="250"/>
     </td>
     <td align="center">
-      <b>2️⃣ Детали блюда</b><br>
-      <img src="images/2.jpg" alt="Детали блюда" width="250"/>
+      <b>2️⃣ Dish details</b><br>
+      <img src="images/2.jpg" alt="Dish details" width="250"/>
     </td>
     <td align="center">
-      <b>3️⃣ Поиск ингредиента</b><br>
-      <img src="images/3.jpg" alt="Поиск ингредиента" width="250"/>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <b>4️⃣ Формирование блюда</b><br>
-      <img src="images/4.jpg" alt="Формирование блюда" width="250"/>
-    </td>
-    <td align="center">
-      <b>5️⃣ Добавление фото блюда</b><br>
-      <img src="images/5.jpg" alt="Добавление фото" width="250"/>
-    </td>
-    <td align="center">
-      <b>6️⃣ Ввод названия блюда</b><br>
-      <img src="images/6.jpg" alt="Ввод названия" width="250"/>
+      <b>3️⃣ Ingredient search</b><br>
+      <img src="images/3.jpg" alt="Ingredient search" width="250"/>
     </td>
   </tr>
   <tr>
     <td align="center">
-      <b>7️⃣ Обновлённый список блюд</b><br>
-      <img src="images/7.jpg" alt="Обновлённый список" width="250"/>
+      <b>4️⃣ Building a dish</b><br>
+      <img src="images/4.jpg" alt="Building a dish" width="250"/>
     </td>
     <td align="center">
-      <b>8️⃣ Интерфейс в светлой теме</b><br>
-      <img src="images/8.jpg" alt="Светлая тема" width="250"/>
+      <b>5️⃣ Adding a dish photo</b><br>
+      <img src="images/5.jpg" alt="Adding a photo" width="250"/>
+    </td>
+    <td align="center">
+      <b>6️⃣ Entering a dish name</b><br>
+      <img src="images/6.jpg" alt="Entering a name" width="250"/>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <b>7️⃣ Updated dish list</b><br>
+      <img src="images/7.jpg" alt="Updated list" width="250"/>
+    </td>
+    <td align="center">
+      <b>8️⃣ Light theme UI</b><br>
+      <img src="images/8.jpg" alt="Light theme" width="250"/>
     </td>
   </tr>
 </table>
@@ -81,50 +81,50 @@
 </div>
 
 
-## 🛠️ Архитектура и используемые технологии
+## 🛠️ Architecture and Technologies
 
-### 📂 Работа с данными
+### 📂 Data Layer
 
 * **Room (SQLite)**
 
-  * Третья нормальная форма (3NF).
-  * DAO, модели, Relations.
-  * `AppDatabase` реализован по паттерну **Singleton**.
-  * `DataRepository` как единая точка доступа к данным.
+  * Third normal form (3NF).
+  * DAOs, models, Relations.
+  * `AppDatabase` implemented as a **Singleton**.
+  * `DataRepository` as a single point of access to data.
 
-### 🔄 Callback-архитектура
+### 🔄 Callback Architecture
 
-* Унифицированные callbacks: `onStart`, `onSuccess`, `onError`, `onFinish`.
-* Гибкое управление UI при долгих операциях (загрузка из БД, парсинг).
+* Unified callbacks: `onStart`, `onSuccess`, `onError`, `onFinish`.
+* Flexible UI control during long-running operations (database loading, scraping).
 
-### 🧩 Паттерны и подходы
+### 🧩 Patterns and Approaches
 
 * **RecyclerView Adapter**
 
-  * Базовый `BaseAdapter`, расширяющий `ListAdapter`, чтобы сократить дублирование кода.
-* **Singleton-менеджер** для промежуточных данных:
+  * A base `BaseAdapter` extending `ListAdapter` to reduce code duplication.
+* **Singleton manager** for intermediate data:
 
-  * `ProductsSelectedManager` хранит выбранные ингредиенты.
-  * Данные защищены от мутабельности.
-* **Абстрактные классы и наследование**
+  * `ProductsSelectedManager` stores the selected ingredients.
+  * Data is protected from mutability.
+* **Abstract classes and inheritance**
 
-  * `Parser` с методами `findProducts(String query)` и `parseProductDetails(Product)`.
-  * Лёгкое добавление новых источников данных (например, новых магазинов).
-* **Utils-модуль**
+  * `Parser` with `findProducts(String query)` and `parseProductDetails(Product)` methods.
+  * Easy to add new data sources (e.g., new stores).
+* **Utils module**
 
-  * `DialogUtils`, `TextWatcherUtils`, `ViewUtils` — сокращение дублирования.
-* **Parcelable-модели** (`Product`, `Nutrition`) — оптимизация под Android IPC.
-* **FragmentResult API** для обмена данными между Activity, BottomSheet и адаптерами.
+  * `DialogUtils`, `TextWatcherUtils`, `ViewUtils` — reducing duplication.
+* **Parcelable models** (`Product`, `Nutrition`) — optimized for Android IPC.
+* **FragmentResult API** for data exchange between Activity, BottomSheet, and adapters.
 
-### 📱 UI и UX
+### 📱 UI and UX
 
 * Material Components (BottomSheet, MaterialDialogs).
 * DataBinding (`BottomSheetDishDetailsBinding.inflate(...)`).
-* Swipe-удаления через ItemTouchHelper.
-* Поддержка **динамических тем Android** (светлая/тёмная).
-* UX-подход: изменения сохраняются сразу, без подтверждений.
+* Swipe-to-delete via ItemTouchHelper.
+* Support for **dynamic Android themes** (light/dark).
+* UX approach: changes are saved instantly, without confirmation dialogs.
 
-## ⚙️ Технологии
+## ⚙️ Technologies
 
 * Java
 * Android SDK
@@ -135,34 +135,33 @@
 * Callbacks API
 * ItemTouchHelper
 
-## 📌 Что улучшено по сравнению с предыдущим проектом (LifeLine)
+## 📌 Improvements Over the Previous Project (LifeLine)
 
-* Использование **Room** вместо ручных SQL-запросов.
-* Архитектура с **Repository** и DAO.
-* **Callback-архитектура** для асинхронных операций.
-* **BaseAdapter** и Utils для сокращения дублирования.
-* Введение **DataBinding**.
-* Поддержка динамических тем.
-* Явный акцент на паттерны проектирования (Singleton, Repository, абстрактные классы).
+* **Room** instead of raw SQL queries.
+* Architecture with a **Repository** and DAOs.
+* **Callback architecture** for asynchronous operations.
+* **BaseAdapter** and Utils to reduce duplication.
+* Introduction of **DataBinding**.
+* Dynamic theme support.
+* A clear emphasis on design patterns (Singleton, Repository, abstract classes).
 
 ## 🚀 Roadmap
 
-Приложение уже имеет полный цикл работы с блюдами (создание → хранение → редактирование →
-удаление).  
-Дальнейшее развитие будет направлено на:
+The app already has a complete dish lifecycle (create → store → edit → delete).  
+Further development will focus on:
 
-### 🔮 Ближайшие улучшения
+### 🔮 Near-Term Improvements
 
-* 🔹 Кэширование результатов поиска ингредиентов.
-* 🔹 Приоритезация популярных продуктов (те, что чаще выбирал пользователь).
-* 🔹 Оптимизация парсинга (параллельные запросы, экономия трафика).
-* 🔹 Улучшенный оффлайн-режим.
-* 🔹 Объединение моделей базы данных и моделей приложения.
+* 🔹 Caching ingredient search results.
+* 🔹 Prioritizing popular products (the ones the user picks most often).
+* 🔹 Scraping optimization (parallel requests, traffic savings).
+* 🔹 Improved offline mode.
+* 🔹 Merging the database models and the app models.
 
-### 🌟 Идеи для будущего
+### 🌟 Future Ideas
 
-* ✨ Генерация названия блюда (с анимацией).
-* ✨ Генерация фото блюда (AI).
-* ✨ Firebase: регистрация пользователей и синхронизация данных.
-* ✨ Расширенные визуальные эффекты (динамические переливы).
-* ✨ “Мемо-память” для блюд (быстрый доступ к недавно изменённым).  
+* ✨ Dish name generation (with animation).
+* ✨ Dish photo generation (AI).
+* ✨ Firebase: user registration and data sync.
+* ✨ Advanced visual effects (dynamic gradients).
+* ✨ "Memo memory" for dishes (quick access to recently edited ones).
