@@ -2,7 +2,7 @@
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/gleb7499/My-dishes?label=APK&style=flat-square)](https://github.com/gleb7499/My-dishes/releases/latest/download/My.dishes-release.apk)
 ![Language](https://img.shields.io/badge/language-Java-orange?style=flat-square)
-![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)
+![License](https://img.shields.io/badge/license-CC--BY--NC%204.0-blue?style=flat-square)
 
 ## 📌 Description
 
@@ -144,6 +144,12 @@ architecture so that the code is **maintainable and extensible**.
 * Introduction of **DataBinding**.
 * Dynamic theme support.
 * A clear emphasis on design patterns (Singleton, Repository, abstract classes).
+
+## 📄 License and attribution
+
+This project is available under the [Creative Commons Attribution-NonCommercial 4.0 International license](LICENSE).
+You may share and adapt it for non-commercial purposes, provided that Loginov Gleb is credited and changes are indicated.
+Commercial use requires prior written permission from the author.
 
 ## 🚀 Roadmap
 
